@@ -6,7 +6,6 @@
 		<FileVersion>2024.0407.2.0</FileVersion>
 		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
 		<LangVersion>10</LangVersion>
-		<CompressionEnabled>false</CompressionEnabled>
 	</PropertyGroup>
 	
 	<ItemGroup>
