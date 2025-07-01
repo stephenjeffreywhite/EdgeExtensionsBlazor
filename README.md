@@ -27,7 +27,7 @@ This is a new tab page extension that is similar to the new tab page for Microso
 # How To Build:
 
 - This project has no external dependencies besides the ones Blazor/Asp.NET rely upon and one specific NuGet package for allowing Blazor to to run as a Browser Extension.
-- You can build it using either the Dot Net 5 SDK CLI, JetBrains Rider or Visual Studio 2019 (latest version; edition does not matter).
+- You can build it using either the Dot Net 9 SDK CLI, JetBrains Rider or Visual Studio 2022 (latest version; edition does not matter).
 - When you build the project, the output folder will contain a browserextension folder. This is the folder that you need to load for the unpacked extension via your extensions menu in Edge/Chromium
 
 
