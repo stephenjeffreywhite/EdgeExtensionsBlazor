@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Blazor Edge New Tab",
   "description": "A new tab page for Microsoft Edge (and all Chromium Browsers) made using Blazor Web Assembly",
-  "version": "1.6",
+  "version": "1.7",
   "content_security_policy": {
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
   },
