@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 	
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net9.0</TargetFramework>
 		<AssemblyVersion>2024.0407.2.0</AssemblyVersion>
 		<FileVersion>2024.0407.2.0</FileVersion>
 		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
@@ -10,9 +10,9 @@
 	</PropertyGroup>
 	
 	<ItemGroup>
-		<PackageReference Include="Blazor.BrowserExtension" Version="1.2.3" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.3" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.3" PrivateAssets="all" />
+		<PackageReference Include="Blazor.BrowserExtension" Version="3.1.2" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.6" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.6" PrivateAssets="all" />
 	</ItemGroup>
 	
 	<ItemGroup>
@@ -21,9 +21,6 @@
 	
 	<ItemGroup>
 		<Content Remove="wwwroot\jsInteropScripts.js" />
-		<Content Remove="wwwroot\css\bootstrap-utilities.css" />
-		<Content Remove="wwwroot\css\bootstrap-utilities.min.css.map" />
-		<Content Remove="wwwroot\css\bootstrap-utilities.min.css" />
 	</ItemGroup>
 	
 	<ItemGroup>
