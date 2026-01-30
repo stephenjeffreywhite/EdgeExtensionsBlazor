@@ -8,7 +8,16 @@
         <br>
         <span class="QuickLinkTitle" title="@QuickLinkUrl" @onclick="OnQuickLinkClicked">@QuickLinkTitle</span>
     </button>
-    <img class="QuickLinkDeleteButton" src="icons\fluent_ellipsis.png" alt="Delete This Quick link" title="Delete this Quick Link" data-bs-toggle="modal" data-bs-target="#@ModalName"/>
+    <div class="dropdown" style="position: relative; display:inline; top: 5%; left: 5%;">
+        @* <img class="QuickLinkDeleteButton" src="icons\fluent_ellipsis.png" alt="Delete This Quick link" title="Delete this Quick Link" data-bs-toggle="modal" data-bs-target="#@ModalName" /> *@
+        <img class="QuickLinkDeleteButton" src="icons\fluent_ellipsis.png" alt="Delete This Quick link" title="Delete this Quick Link" data-bs-toggle="dropdown" />
+        <ul class="dropdown-menu" data-bs-theme="dark">
+            <li><a class="dropdown-item" href="#">Edit</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#@ModalName">Delete</a></li>
+        </ul>
+    </div>
+    
 </div>
 
 <div class="modal fade" id="@ModalName" tabindex="-1" aria-labelledby="DeleteQuickLinkModalTitle" aria-hidden="true">
