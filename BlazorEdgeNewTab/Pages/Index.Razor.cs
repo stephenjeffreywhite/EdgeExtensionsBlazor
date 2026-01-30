@@ -8,6 +8,7 @@ using BlazorEdgeNewTab.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
+using WebExtensions.Net.Bookmarks;
 using WebExtensions.Net.Downloads;
 
 namespace BlazorEdgeNewTab.Pages;
@@ -277,6 +278,12 @@ public partial class Index
 
     private async Task QuickLinksFolderChangedHandler()
     {
+        await SetUpQuickLinks();
+    }
+
+    public async Task EditQuickLink(string quickLinkId, string newTitle, string newUrl)
+    {
+        await WebExtensions.Bookmarks.Update(quickLinkId, new Changes { Title = newTitle, Url = newUrl });
         await SetUpQuickLinks();
     }
 

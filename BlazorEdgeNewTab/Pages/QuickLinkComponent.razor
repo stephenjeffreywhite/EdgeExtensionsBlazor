@@ -8,19 +8,41 @@
         <br>
         <span class="QuickLinkTitle" title="@QuickLinkUrl" @onclick="OnQuickLinkClicked">@QuickLinkTitle</span>
     </button>
-    <div class="dropdown" style="position: relative; display:inline; top: 5%; left: 5%;">
-        @* <img class="QuickLinkDeleteButton" src="icons\fluent_ellipsis.png" alt="Delete This Quick link" title="Delete this Quick Link" data-bs-toggle="modal" data-bs-target="#@ModalName" /> *@
-        <img class="QuickLinkDeleteButton" src="icons\fluent_ellipsis.png" alt="Delete This Quick link" title="Delete this Quick Link" data-bs-toggle="dropdown" />
+    <div class="dropdown QuickLinkDropDownHolder">
+        <img class="QuickLinkHoverButton" src="icons\fluent_ellipsis.png" alt="Delete This Quick link" title="Click to edit or delete this Quick Link" data-bs-toggle="dropdown" />
         <ul class="dropdown-menu" data-bs-theme="dark">
-            <li><a class="dropdown-item" href="#">Edit</a></li>
+            <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#@EditModalName" @onclick="ResetEditQuickLink">Edit</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#@ModalName">Delete</a></li>
+            <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#@DeleteModalName">Delete</a></li>
         </ul>
     </div>
     
 </div>
+<div class="modal fade" id="@EditModalName" tabindex="-1" aria-labelledby="EditQuickLinkModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content M365PopUp">
+            <div class="modal-header">
+                <h5 class="modal-title text-secondary" id="EditQuickLinkModalTitle">Edit Quick Link</h5>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="EditQuickLinkTitle" class="form-label">Title</label>
+                    <input type="text" class="form-control" id="EditQuickLinkTitle" @bind="@NewQuickLinkTitle" />
+                </div>
+                <div class="mb-3">
+                    <label for="EditQuickLinkUrl" class="form-label">URL</label>
+                    <input type="text" class="form-control" id="EditQuickLinkUrl" @bind="@NewQuickLinkUrl" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" @onclick="EditQuickLink" data-bs-dismiss="modal">Save Changes</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"@onclick="ResetEditQuickLink">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-<div class="modal fade" id="@ModalName" tabindex="-1" aria-labelledby="DeleteQuickLinkModalTitle" aria-hidden="true">
+<div class="modal fade" id="@DeleteModalName" tabindex="-1" aria-labelledby="DeleteQuickLinkModalTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content M365PopUp">
             <div class="modal-header">

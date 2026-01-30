@@ -22,7 +22,11 @@ public partial class QuickLinkComponent
     [CascadingParameter]
     public Index NewTabPage { get; set; }
 
-    public string ModalName => $"DeleteQuickLinkModalFor{QuickLinkId}";
+    public string DeleteModalName => $"DeleteQuickLinkModalFor{QuickLinkId}";
+    public string EditModalName => $"EditQuickLinkModalFor{QuickLinkId}";
+
+    private string NewQuickLinkTitle { get; set; }
+    private string NewQuickLinkUrl   { get; set; }
 
     private void OnQuickLinkClicked()
     {
@@ -32,5 +36,20 @@ public partial class QuickLinkComponent
     private async Task DeleteQuickLink()
     {
         await NewTabPage.DeleteQuickLink(QuickLinkId);
+    }
+
+    private async Task EditQuickLink()
+    {
+        await NewTabPage.EditQuickLink(QuickLinkId, NewQuickLinkTitle, NewQuickLinkUrl);
+        QuickLinkTitle = NewQuickLinkTitle;
+        QuickLinkUrl = NewQuickLinkUrl;
+        StateHasChanged();
+    }
+
+    private Task ResetEditQuickLink()
+    {
+        NewQuickLinkTitle = QuickLinkTitle;
+        NewQuickLinkUrl = QuickLinkUrl;
+        return Task.CompletedTask;
     }
 }
