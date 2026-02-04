@@ -216,7 +216,7 @@ public partial class Index
     private async Task SetBackgroundImage(string url)
     {
         var fullImagePath = "https://bing.com" + url;
-        await JS.InvokeVoidAsync("setBackgroundImage1", fullImagePath).ConfigureAwait(false);
+        await JS.InvokeVoidAsync("setBackgroundImage1", fullImagePath);
         ImageDownloadLink = fullImagePath.Replace("&pid=hp", "");
     }
 
