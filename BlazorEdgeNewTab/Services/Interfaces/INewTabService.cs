@@ -10,4 +10,5 @@ public interface INewTabService
     public Task<BingImageOfTheDayDto> GetImageOfDayDto();
 
     public Task<List<QuickLink>> SetUpQuickLinks(IWebExtensionsApi webExtensions);
+    public Task SwapQuickLinks(IWebExtensionsApi webExtensions, string droppedQuickLinkId, string destinationQuickLinkId);
 }

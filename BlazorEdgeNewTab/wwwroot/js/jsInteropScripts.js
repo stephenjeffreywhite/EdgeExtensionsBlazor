@@ -1,10 +1,6 @@
 ﻿window.setBackgroundImage1 = (url) => document.getElementsByTagName("body")[0].style =
     `background-image: url(${url})`;
 
-window.runSearchQuery = (url) => chrome.search.query({text: url}, () => {
-    console.log(url);
-});
-
 function enableToasts() {
     var toastElList = [].slice.call(document.querySelectorAll('.toast'));
     var toastList = toastElList.map(function (toastEl) {
@@ -27,3 +23,10 @@ function showSaveChangesToast() {
 window.SetFocusToElement = (element) => {
     element.focus();
 }
+
+document.addEventListener("dragover", (e) => {
+    // Limit scope so we're not preventing default everywhere:
+    if (e.target.classList.contains('QuickLinkContent')) {
+        e.preventDefault();      // <-- the key
+    }
+}, true);

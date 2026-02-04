@@ -63,11 +63,9 @@ public class NewTabService : INewTabService
 
     public async Task<List<QuickLink>> SetUpQuickLinks(IWebExtensionsApi webExtensions)
     {
-        var quickLinks  = new List<QuickLink>();
-        var extensionId = webExtensions.Runtime.Id;
-        var bookMarkNode =
-            await webExtensions.Bookmarks.Search(Settings.GetSettingValue(SettingsValues.QuickLinkBookMarkFolder));
-        var bookmarkTreeNodes = bookMarkNode.ToList();
+        var                    quickLinks        = new List<QuickLink>();
+        var                    extensionId       = webExtensions.Runtime.Id;
+        var bookmarkTreeNodes = await GetBookmarkTreeNodes(webExtensions);
         if (!bookmarkTreeNodes.Any())
         {
             var folderName = Settings.GetSettingValue(SettingsValues.QuickLinkBookMarkFolder);
@@ -90,10 +88,34 @@ public class NewTabService : INewTabService
         return quickLinks;
     }
 
+    public async Task SwapQuickLinks(IWebExtensionsApi webExtensions, string droppedQuickLinkId, string destinationQuickLinkId)
+    {
+        var parent             = await GetBookmarkTreeNodes(webExtensions);
+        var quickLinkBookMarks = await webExtensions.Bookmarks.GetChildren(parent.First().Id);
+        if (quickLinkBookMarks == null)
+        {
+            return;
+        }
+        var quickLink1 = quickLinkBookMarks.FirstOrDefault(node => node.Id == droppedQuickLinkId);
+        var quickLink2 = quickLinkBookMarks.FirstOrDefault(node => node.Id == destinationQuickLinkId);
+        if (quickLink1 != null && quickLink2 != null)
+        {
+            await webExtensions.Bookmarks.Move(droppedQuickLinkId, new Destination() { Index = quickLink2.Index });
+            await webExtensions.Bookmarks.Move(destinationQuickLinkId, new Destination() { Index = quickLink1.Index });
+        }
+    }
+
     private string GetFaviconUrl(string extensionId, string quickLinkUrl)
     {
         var encodedQuickLinkUrl = UrlEncoder.Default.Encode(quickLinkUrl);
         var url                 = $"chrome-extension://{extensionId}/_favicon/?pageUrl={encodedQuickLinkUrl}&size=64";
         return url;
+    }
+    private async Task<List<BookmarkTreeNode>> GetBookmarkTreeNodes(IWebExtensionsApi webExtensions)
+    {
+        var bookMarkNode =
+            await webExtensions.Bookmarks.Search(Settings.GetSettingValue(SettingsValues.QuickLinkBookMarkFolder));
+        var bookmarkTreeNodes = bookMarkNode.ToList();
+        return bookmarkTreeNodes;
     }
 }

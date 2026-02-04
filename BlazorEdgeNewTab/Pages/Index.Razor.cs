@@ -1,15 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
-using BlazorEdgeNewTab.Constants;
+﻿using BlazorEdgeNewTab.Constants;
 using BlazorEdgeNewTab.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
+using WebExtensions.Net;
 using WebExtensions.Net.Bookmarks;
 using WebExtensions.Net.Downloads;
+using WebExtensions.Net.Search;
 
 namespace BlazorEdgeNewTab.Pages;
 
@@ -24,13 +26,14 @@ public partial class Index
     private bool              _searchVisible;
 
     protected ElementReference SearchBoxElement;
-    private   string           SearchQuery        { get; set; }
-    public    string           ImageDownloadLink  { get; set; }
-    public    string           MuseumCardText     { get; set; }
-    public    string           MuseumCardText2    { get; set; }
-    public    string           MuseumLink         { get; set; }
-    public    string           MuseumLink2        { get; set; }
-    public    SettingsMenu     SettingsMenuNewTab { get; set; }
+    private   string           SearchQuery         { get; set; }
+    public    string           ImageDownloadLink   { get; set; }
+    public    string           MuseumCardText      { get; set; }
+    public    string           MuseumCardText2     { get; set; }
+    public    string           MuseumLink          { get; set; }
+    public    string           MuseumLink2         { get; set; }
+    public    SettingsMenu     SettingsMenuNewTab  { get; set; }
+    public    string           DraggingQuickLinkId { get; set; }
 
     public bool FilterMode
     {
@@ -241,10 +244,8 @@ public partial class Index
             {
                 if (string.IsNullOrWhiteSpace(SearchQuery)) return Task.CompletedTask;
                 Console.WriteLine($"Performing a search with query : {SearchQuery}");
-                // The code below always throws an exception; we are using JS Interop to work around this for now...
-                // var searchProps = new SearchProperties {Query = SearchQuery};
-                //await WebExtensions.Search.Query(new QueryInfo {Text = SearchQuery, Disposition = Disposition.CurrentTab, AdditionalData = null, TabId = null}).ConfigureAwait(false);
-                JS.InvokeVoidAsync("runSearchQuery", SearchQuery).ConfigureAwait(false);
+                var searchProps = new SearchProperties {Query = SearchQuery};
+                WebExtensions.Search.Query(new QueryInfo {Text = SearchQuery, Disposition = Disposition.CURRENTTAB, AdditionalData = null, TabId = null}).ConfigureAwait(false);
             }
         }
         catch (Exception e)
@@ -266,15 +267,12 @@ public partial class Index
 
 
 
-    private async Task OnDownloadImageClick()
+    private async Task OnDownloadImageClick() => await WebExtensions.Downloads.Download(new DownloadOptions
     {
-        await WebExtensions.Downloads.Download(new DownloadOptions
-        {
-            Url = ImageDownloadLink,
-            SaveAs = true,
-            Filename = $"{GetImageNameForIndex(_imageArchiveIndex)}.jpeg"
-        });
-    }
+        Url = ImageDownloadLink,
+        SaveAs = true,
+        Filename = $"{GetImageNameForIndex(_imageArchiveIndex)}.jpeg"
+    });
 
     private async Task QuickLinksFolderChangedHandler()
     {
@@ -284,6 +282,12 @@ public partial class Index
     public async Task EditQuickLink(string quickLinkId, string newTitle, string newUrl)
     {
         await WebExtensions.Bookmarks.Update(quickLinkId, new Changes { Title = newTitle, Url = newUrl });
+        await SetUpQuickLinks();
+    }
+
+    public async Task OnQuickLinkDragged(string droppedQuickLinkId, string destinationQuickLinkId)
+    {
+        await NewTabService.SwapQuickLinks(WebExtensions, droppedQuickLinkId, destinationQuickLinkId);
         await SetUpQuickLinks();
     }
 
