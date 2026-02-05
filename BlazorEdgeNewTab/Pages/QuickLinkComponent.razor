@@ -1,7 +1,7 @@
 ﻿
 
-<div>
-    <button class="QuickLinkContent" @onclick="OnQuickLinkClicked" @ondrop="HandleDrop" @ondragstart="@OnDragStart" draggable="true">
+<div @ondrop="HandleDrop" @ondragstart="@OnDragStart" draggable="true" @ondragover="@OnDragOver" @ondragleave="@OnDragLeave" @ondrag="@OnDragEnd">
+    <button class="QuickLinkContent @DropOverCssClass" @onclick="OnQuickLinkClicked">
         <div class="QuickLinkBookMarkImageContainer" @onclick="OnQuickLinkClicked">
             <img src="@QuickLinkImageUrl" class="QuickLinkBookMarkImage" alt="@QuickLinkTitle" title="@QuickLinkUrl"/>
         </div>

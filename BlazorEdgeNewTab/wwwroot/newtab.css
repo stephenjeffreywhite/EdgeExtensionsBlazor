@@ -266,6 +266,11 @@
     background: var(--main-bg-hover);
 }
 
+.QuickLinkContentDragOver {
+    opacity: 0.75;
+    background: var(--main-bg-focus);
+}
+
 .QuickLinkHoverButton {
     position: relative;
     display: inline;
@@ -308,7 +313,8 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-
+    pointer-events: none;
+    user-select: none;
 }
 
 .QuickLinkTitle {

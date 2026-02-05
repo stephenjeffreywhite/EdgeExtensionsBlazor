@@ -34,6 +34,7 @@ public partial class QuickLinkComponent
 
     private string NewQuickLinkTitle { get; set; }
     private string NewQuickLinkUrl   { get; set; }
+    public  string DropOverCssClass      { get; set; }
 
     private void OnQuickLinkClicked()
     {
@@ -62,6 +63,10 @@ public partial class QuickLinkComponent
 
     private async Task HandleDrop(DragEventArgs arg)
     {
+        if (!string.IsNullOrWhiteSpace(DropOverCssClass))
+        {
+            DropOverCssClass = "";
+        }
         if (NewTabPage.DraggingQuickLinkId != null && QuickLinkId != NewTabPage.DraggingQuickLinkId)
         {
             Console.WriteLine($"Dropped {NewTabPage.DraggingQuickLinkId} on {QuickLinkId}");
@@ -73,6 +78,30 @@ public partial class QuickLinkComponent
     {
         Console.WriteLine($"Started dragging {QuickLinkId}");
         NewTabPage.DraggingQuickLinkId = QuickLinkId;
+        return Task.CompletedTask;
+    }
+
+    private Task OnDragOver(DragEventArgs arg)
+    {
+        DropOverCssClass = "QuickLinkContentDragOver";
+        return Task.CompletedTask;
+    }
+
+    private Task OnDragLeave(DragEventArgs arg)
+    {
+        if (!string.IsNullOrWhiteSpace(DropOverCssClass))
+        {
+            DropOverCssClass = "";
+        }
+        return Task.CompletedTask;
+    }
+
+    private Task OnDragEnd(DragEventArgs arg)
+    {
+        if (!string.IsNullOrWhiteSpace(DropOverCssClass))
+        {
+            DropOverCssClass = "";
+        }
         return Task.CompletedTask;
     }
 }

@@ -26,7 +26,9 @@ window.SetFocusToElement = (element) => {
 
 document.addEventListener("dragover", (e) => {
     // Limit scope so we're not preventing default everywhere:
-    if (e.target.classList.contains('QuickLinkContent')) {
+    if (e.target.classList.contains('QuickLinkContent')
+        || e.target.classList.contains('QuickLinkBookMarkImage')
+        || e.target.classList.contains('QuickLinkBookMarkImageContainer')) {
         e.preventDefault();      // <-- the key
     }
 }, true);
