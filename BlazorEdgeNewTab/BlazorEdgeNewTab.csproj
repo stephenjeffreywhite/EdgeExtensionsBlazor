@@ -4,8 +4,7 @@
 		<TargetFramework>net10.0</TargetFramework>
 		<AssemblyVersion>2026.0130.1.0</AssemblyVersion>
 		<FileVersion>2026.0130.1.0</FileVersion>
-		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
-		<LangVersion>10</LangVersion>
+    <NoWarn>$(NoWarn);NU1504;NU1605</NoWarn>
 	</PropertyGroup>
 	
 	<ItemGroup>

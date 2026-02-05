@@ -16,7 +16,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "BlazorLiquidSeperation": {
+    "Kestrel": {
       "commandName": "Project",
       "dotnetRunMessages": "true",
       "launchBrowser": true,

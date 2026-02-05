@@ -9,13 +9,12 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using BlazorEdgeNewTab.Constants;
 using BlazorEdgeNewTab.Models;
-using BlazorEdgeNewTab.Services.Interfaces;
 using WebExtensions.Net;
 using WebExtensions.Net.Bookmarks;
 
 namespace BlazorEdgeNewTab.Services;
 
-public class NewTabService : INewTabService
+public class NewTabService
 {
     private readonly string BingImageOfDayUri =
         "https://api.allorigins.win/get?url=https%3A//www.bing.com/HPImageArchive.aspx%3Fformat%3Djs%26idx%3D0%26n%3D7";

@@ -2,7 +2,6 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using BlazorEdgeNewTab.Services;
-using BlazorEdgeNewTab.Services.Interfaces;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,7 +10,6 @@ namespace BlazorEdgeNewTab;
 
 public static class Program
 {
-#pragma warning disable AsyncFixer01 // Unnecessary async/await usage
     public static async Task Main(string[] args)
     {
         var builder = WebAssemblyHostBuilder.CreateDefault(args);
@@ -21,8 +19,7 @@ public static class Program
             builder.RootComponents.Add<HeadOutlet>("head::after");
         });
         builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
-        builder.Services.AddSingleton<INewTabService, NewTabService>();
+        builder.Services.AddSingleton<NewTabService>(); //Add as singleton since there is only one new tab page instance, and we want to preserve state.
         await builder.Build().RunAsync();
     }
-#pragma warning restore AsyncFixer01 // Unnecessary async/await usage
 }

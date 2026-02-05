@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using WebExtensions.Net;
 using WebExtensions.Net.Bookmarks;
 using WebExtensions.Net.Downloads;
 using WebExtensions.Net.Search;
@@ -54,10 +53,10 @@ public partial class Index
         //NOTE - Do NOT get settings until the quick links are set up. The elements need to exist in the dom first or the
         //QuickLinksVisible property will cause a nasty exception because it's trying to work on an HTML element that isn't drawn yet.
         await Settings.LoadSettingsAsync(WebExtensions).ContinueWith(_ => SetUpQuickLinks());
-        await GetBingImagesForNewTab();
+        await GetBingImage();
         _filterMode = Convert.ToBoolean(Settings.GetSettingValue(SettingsValues.UseQuickLinksFilter));
         if (_filterMode) UpdateSearchEmptyText();
-        await JS.InvokeVoidAsync("SetFocusToElement", SearchBoxElement);
+        await JsRunTime.InvokeVoidAsync("SetFocusToElement", SearchBoxElement);
     }
 
     private void UpdateSearchEmptyText()
@@ -65,11 +64,6 @@ public partial class Index
         SearchEmptyText = _filterMode
             ? "Type in a filter and hit enter to apply it. Blank filter resets the filter."
             : "Search the web...";
-    }
-
-    private async Task GetBingImagesForNewTab()
-    {
-        await GetBingImage();
     }
 
     protected override Task OnAfterRenderAsync(bool firstRender)
@@ -216,7 +210,7 @@ public partial class Index
     private async Task SetBackgroundImage(string url)
     {
         var fullImagePath = "https://bing.com" + url;
-        await JS.InvokeVoidAsync("setBackgroundImage1", fullImagePath);
+        await JsRunTime.InvokeVoidAsync("setBackgroundImage1", fullImagePath);
         ImageDownloadLink = fullImagePath.Replace("&pid=hp", "");
     }
 
@@ -312,7 +306,7 @@ public partial class Index
         Settings.UpdateSetting(SettingsValues.ReQueryImagesAfterTime,
             DateTime.Now.AddDays(-1).ToString(CultureInfo.InvariantCulture));
         await Settings.SaveAsync();
-        await GetBingImagesForNewTab();
+        await GetBingImage();
         StateHasChanged();
     }
 }
