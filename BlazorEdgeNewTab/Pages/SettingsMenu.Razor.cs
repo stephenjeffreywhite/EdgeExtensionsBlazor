@@ -10,45 +10,19 @@ public partial class SettingsMenu
     public EventCallback OnQuickLinksFolderChangedCallBack { get; set; }
 
     [Parameter]
-    public EventCallback OnQuickLinksVisibleChangedCallBack { get; set; }
-
-    [Parameter]
-    public EventCallback OnSearchVisibleChangedCallBack { get; set; }
-
-    [Parameter]
     public EventCallback OnRefreshImageOfDayCallBack { get; set; }
 
-    private bool _quickLinksVisible { get; set; }
 
-    public bool QuickLinksVisible
-    {
-        get => _quickLinksVisible;
-        set
-        {
-            if (value == _quickLinksVisible) return;
-            Console.WriteLine($"Setting show quick links to {value}");
-            _quickLinksVisible = value;
-            Settings.UpdateSetting(SettingsValues.ShowQuickLinks, value);
-            Settings.SaveAsync();
-            OnQuickLinksVisibleChangedCallBack.InvokeAsync();
-        }
-    }
+    [Parameter]
+    public bool QuickLinksVisible { get; set; }
+    [Parameter]
+    public EventCallback<bool> QuickLinksVisibleChanged { get; set; }
 
-    private bool _searchVisible { get; set; }
 
-    public bool SearchVisible
-    {
-        get => _searchVisible;
-        set
-        {
-            if (value == _searchVisible) return;
-            Console.WriteLine($"Setting search visible to {value}");
-            _searchVisible = value;
-            Settings.UpdateSetting(SettingsValues.ShowWebSearch, value);
-            Settings.SaveAsync();
-            OnSearchVisibleChangedCallBack.InvokeAsync();
-        }
-    }
+    [Parameter]
+    public bool SearchVisible { get; set; }
+    [Parameter]
+    public EventCallback<bool> SearchVisibleChanged { get; set; }
 
     public string QuickLinksFolder
     {
@@ -62,13 +36,6 @@ public partial class SettingsMenu
             Settings.SaveAsync();
             OnQuickLinksFolderChangedCallBack.InvokeAsync();
         }
-    }
-
-    protected override void OnAfterRender(bool firstRender)
-    {
-        QuickLinksVisible = Convert.ToBoolean(Settings.GetSettingValue(SettingsValues.ShowQuickLinks));
-        SearchVisible = Convert.ToBoolean(Settings.GetSettingValue(SettingsValues.ShowWebSearch));
-        base.OnAfterRender(firstRender);
     }
 
     private void ResetSettings()

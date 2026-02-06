@@ -22,7 +22,7 @@ public partial class Index
     private BingImageOfTheDay _imageOfTheDay;
     private List<QuickLink>   QuickLinks { get; set; }
     private bool              QuickLinksVisible { get; set; }
-    private bool              _searchVisible;
+    private bool              SearchVisible;
 
     protected ElementReference SearchBoxElement;
     private   string           SearchQuery         { get; set; }
@@ -31,7 +31,6 @@ public partial class Index
     public    string           MuseumCardText2     { get; set; }
     public    string           MuseumLink          { get; set; }
     public    string           MuseumLink2         { get; set; }
-    public    SettingsMenu     SettingsMenuNewTab  { get; set; }
     public    string           DraggingQuickLinkId { get; set; }
 
     public bool FilterMode
@@ -55,6 +54,8 @@ public partial class Index
         await Settings.LoadSettingsAsync(WebExtensions).ContinueWith(_ => SetUpQuickLinks());
         await GetBingImage();
         _filterMode = Convert.ToBoolean(Settings.GetSettingValue(SettingsValues.UseQuickLinksFilter));
+        SearchVisible = Convert.ToBoolean(Settings.GetSettingValue(SettingsValues.ShowWebSearch));
+        QuickLinksVisible = Convert.ToBoolean(Settings.GetSettingValue(SettingsValues.ShowQuickLinks));
         if (_filterMode) UpdateSearchEmptyText();
         await JsRunTime.InvokeVoidAsync("SetFocusToElement", SearchBoxElement);
     }
@@ -64,17 +65,6 @@ public partial class Index
         SearchEmptyText = _filterMode
             ? "Type in a filter and hit enter to apply it. Blank filter resets the filter."
             : "Search the web...";
-    }
-
-    protected override Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            _searchVisible = SettingsMenuNewTab.SearchVisible;
-            QuickLinksVisible = SettingsMenuNewTab.QuickLinksVisible;
-        }
-
-        return base.OnAfterRenderAsync(firstRender);
     }
 
     private void FilterQuickLinks()
@@ -291,14 +281,18 @@ public partial class Index
         await SetUpQuickLinks();
     }
 
-    private void SearchVisibleChanged()
+    private void SearchVisibleChanged(bool visible)
     {
-        _searchVisible = SettingsMenuNewTab.SearchVisible;
+        SearchVisible = visible;
+        Settings.UpdateSetting(SettingsValues.ShowWebSearch, visible);
+        Settings.SaveAsync();
     }
 
-    private void QuickLinksVisibleChanged()
+    private void QuickLinksVisibleChanged(bool value)
     {
-        QuickLinksVisible = SettingsMenuNewTab.QuickLinksVisible;
+        QuickLinksVisible = value;
+        Settings.UpdateSetting(SettingsValues.ShowQuickLinks, value);
+        Settings.SaveAsync();
     }
 
     private async Task RefreshImageOfDayHandler()

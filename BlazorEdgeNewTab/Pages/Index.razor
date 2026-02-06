@@ -24,10 +24,12 @@
             </div>
         </div>
         <div class="col-1">
-            <SettingsMenu @ref="SettingsMenuNewTab" OnQuickLinksFolderChangedCallBack="QuickLinksFolderChangedHandler"
-                          OnSearchVisibleChangedCallBack="SearchVisibleChanged"
+            <SettingsMenu OnQuickLinksFolderChangedCallBack="QuickLinksFolderChangedHandler"
+                          SearchVisible="@SearchVisible"
+                          SearchVisibleChanged="SearchVisibleChanged"
                           OnRefreshImageOfDayCallBack="RefreshImageOfDayHandler"
-                          OnQuickLinksVisibleChangedCallBack="QuickLinksVisibleChanged">
+                          QuickLinksVisible="@QuickLinksVisible"
+                          QuickLinksVisibleChanged="QuickLinksVisibleChanged">
             </SettingsMenu>
         </div>
     </div>
@@ -59,7 +61,7 @@
         </div>
         <div class="col"></div>
         <div class="col-6">
-            <form @onsubmit="Enter" hidden="@(!_searchVisible)">
+            <form @onsubmit="Enter" hidden="@(!SearchVisible)">
                 <div class="input-group mb-3">
                     <input class="form-control SearchBoxStyle" type="text" @bind="SearchQuery" placeholder="@SearchEmptyText" aria-label="Query" aria-describedby="queryButtonAddon" name="SearchBox"
                            @ref="SearchBoxElement">
@@ -79,7 +81,7 @@
             </form>
         </div>
         <div class="col">
-            <img src=".\icons\fluent_download.png" class="DownloadButtonStyle" alt="Click To Download" title="Click to download this image" @onclick="OnDownloadImageClick" hidden="@(!_searchVisible)"/>
+            <img src=".\icons\fluent_download.png" class="DownloadButtonStyle" alt="Click To Download" title="Click to download this image" @onclick="OnDownloadImageClick" hidden="@(!SearchVisible)"/>
         </div>
         <div class="col"></div>
     </div>
