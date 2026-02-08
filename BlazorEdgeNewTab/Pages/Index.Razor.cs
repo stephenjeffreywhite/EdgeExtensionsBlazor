@@ -26,7 +26,7 @@ public partial class Index
     private List<QuickLink>         QuickLinks        { get; set; }
     private bool                    QuickLinksVisible { get; set; }
     //Setup Modal
-    private string       SetUpModalCssClass             { get; set; }
+    private bool         ShowSetupModal                 { get; set; }
     private string       NewQuickLinkBookMarkFolderName { get; set; }
     private List<string> BookmarkFolders                { get; set; } = new List<string>();
     //Search Box
@@ -99,8 +99,8 @@ public partial class Index
         var bookMarkFolder = SettingsService.GetSettingsValue<string>(SettingsValues.QuickLinkBookMarkSetting);
         if (string.IsNullOrWhiteSpace(bookMarkFolder))
         {
-            SetUpModalCssClass = "show";
             BookmarkFolders = await NewTabService.GetBookmarkFolders(WebExtensions);
+            ShowSetupModal = true;
             StateHasChanged();
         }
         else
@@ -118,15 +118,11 @@ public partial class Index
         if (string.IsNullOrWhiteSpace(NewQuickLinkBookMarkFolderName)) return;
         await NewTabService.CreateNewBookmarkFolder(WebExtensions, NewQuickLinkBookMarkFolderName);   
         await SetUpQuickLinks();
-        SetUpModalCssClass = "";
+        ShowSetupModal = false;
         StateHasChanged();
     }
 
-    private async Task SetNewQuickLinkBookMarkFolderName(string folder)
-    {
-        NewQuickLinkBookMarkFolderName = folder;
-        await InvokeAsync(StateHasChanged);
-    }
+
 
     private async Task GetBingImage()
     {
@@ -289,9 +285,9 @@ public partial class Index
         Filename = $"{GetImageNameForIndex(_imageArchiveIndex)}.jpeg"
     });
 
-    private async Task QuickLinksFolderChangedHandler()
+    private async Task EditQuickLinkFolder()
     {
-        SetUpModalCssClass = "show";
+        ShowSetupModal = true;
         BookmarkFolders = await NewTabService.GetBookmarkFolders(WebExtensions);
         NewQuickLinkBookMarkFolderName =  SettingsService.GetSettingsValue<string>(SettingsValues.QuickLinkBookMarkSetting);
         await InvokeAsync(StateHasChanged);

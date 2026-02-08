@@ -8,7 +8,7 @@ namespace BlazorEdgeNewTab.Pages;
 public partial class SettingsMenu
 {
     [Parameter]
-    public EventCallback OnQuickLinksFolderChangedCallBack { get; set; }
+    public EventCallback ChangeQuickLinkFolder { get; set; }
 
     [Parameter]
     public EventCallback OnRefreshImageOfDayCallBack { get; set; }

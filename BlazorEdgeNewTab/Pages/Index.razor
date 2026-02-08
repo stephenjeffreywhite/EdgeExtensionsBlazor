@@ -25,7 +25,7 @@
             </div>
         </div>
         <div class="col-1">
-            <SettingsMenu OnQuickLinksFolderChangedCallBack="QuickLinksFolderChangedHandler"
+            <SettingsMenu ChangeQuickLinkFolder="EditQuickLinkFolder"
                           SearchVisible="@SearchVisible"
                           SearchVisibleChanged="SearchVisibleChanged"
                           OnRefreshImageOfDayCallBack="RefreshImageOfDayHandler"
@@ -95,36 +95,6 @@
         </div>
     </div>
 </div>
-<div class="modal fade @SetUpModalCssClass" id="SetupModal" tabindex="-1" aria-labelledby="StartUpModalTitle" aria-hidden="true" style="display:@(string.IsNullOrWhiteSpace(SetUpModalCssClass) ? "none" : "block;")">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content M365PopUp">
-            <div class="modal-header">
-                <h5 class="modal-title text-secondary" id="StartUpModalTitle">Edit Quick Link</h5>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label for="QuickLinkBookMarkFolderName" class="form-label">Select A Bookmarks Folder To Use For Your Quick Links</label>
-                    <div class="dropdown">
-                        <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Select A Bookmark Folder...
-                        </button>
-                        <ul class="dropdown-menu" data-bs-theme="dark">
-                            @foreach(var folder in BookmarkFolders)
-                            {
-                                <li><a class="dropdown-item" @onclick="() => SetNewQuickLinkBookMarkFolderName(folder)">@folder</a></li>
-                            }
-                        </ul>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label for="QuickLinkBookMarkFolderName" class="form-label">Selected Quicklink Folder</label>
-                    <input type="text" class="form-control" id="QuickLinkBookMarkFolderName" @bind="@NewQuickLinkBookMarkFolderName" aria-describedby="QuickLinkBookMarkFolderNameHelp" data-bs-theme="dark" />
-                    <div data-bs-theme="dark" id="QuickLinkBookMarkFolderNameHelp" class="form-text">Enter the name of the folder you want to use for your quick links. Subfolders are ignored. Enter a new bookmark folder name if you want to create a new folder.</div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" @onclick="SetUpQuickLinksFolder" data-bs-dismiss="modal">Save Changes</button>
-            </div>
-        </div>
-    </div>
-</div>
+<SetupBookmarkModal BookmarkFolders="@BookmarkFolders" ShowSetUpModal="@ShowSetupModal" 
+                    @bind-NewQuickLinkBookMarkFolderName="@NewQuickLinkBookMarkFolderName" 
+                    SetUpQuickLinksFolder="@SetUpQuickLinksFolder"></SetupBookmarkModal>
