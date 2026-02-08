@@ -1,5 +1,6 @@
 ﻿using System;
 using BlazorEdgeNewTab.Constants;
+using BlazorEdgeNewTab.Services;
 using Microsoft.AspNetCore.Components;
 
 namespace BlazorEdgeNewTab.Pages;
@@ -26,22 +27,22 @@ public partial class SettingsMenu
 
     public string QuickLinksFolder
     {
-        get => Settings.GetSettingValue(SettingsValues.QuickLinkBookMarkFolder);
+        get => SettingsService.GetSettingsValue<string>(SettingsValues.QuickLinkBookMarkSetting);
         set
         {
-            var currentFolderName = Settings.GetSettingValue(SettingsValues.QuickLinkBookMarkFolder);
+            var currentFolderName = SettingsService.GetSettingsValue<string>(SettingsValues.QuickLinkBookMarkSetting);
             if (string.IsNullOrWhiteSpace(value) || currentFolderName == value) return;
             Console.WriteLine($"Setting QuickLinks Folder To {value}");
-            Settings.UpdateSetting(SettingsValues.QuickLinkBookMarkFolder, value);
-            Settings.SaveAsync();
+            SettingsService.UpdateSetting(SettingsValues.QuickLinkBookMarkSetting, value);
+            SettingsService.SaveAsync();
             OnQuickLinksFolderChangedCallBack.InvokeAsync();
         }
     }
 
     private void ResetSettings()
     {
-        Settings.ResetSettings();
-        Settings.SaveAsync();
+        SettingsService.ResetSettings();
+        SettingsService.SaveAsync();
     }
 
     private void RefreshImageOfDay()

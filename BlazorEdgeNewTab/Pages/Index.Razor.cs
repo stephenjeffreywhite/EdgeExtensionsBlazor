@@ -1,5 +1,6 @@
 ﻿using BlazorEdgeNewTab.Constants;
 using BlazorEdgeNewTab.Models;
+using BlazorEdgeNewTab.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
@@ -40,8 +41,8 @@ public partial class Index
         {
             _filterMode = value;
             UpdateSearchEmptyText();
-            Settings.UpdateSetting(SettingsValues.UseQuickLinksFilter, value.ToString());
-            Settings.SaveAsync();
+            SettingsService.UpdateSetting(SettingsValues.UseQuickLinksFilterSetting, value.ToString());
+            SettingsService.SaveAsync();
         }
     }
 
@@ -51,11 +52,11 @@ public partial class Index
     {
         //NOTE - Do NOT get settings until the quick links are set up. The elements need to exist in the dom first or the
         //QuickLinksVisible property will cause a nasty exception because it's trying to work on an HTML element that isn't drawn yet.
-        await Settings.LoadSettingsAsync(WebExtensions).ContinueWith(_ => SetUpQuickLinks());
+        await SettingsService.LoadSettingsAsync(WebExtensions).ContinueWith(_ => SetUpQuickLinks());
         await GetBingImage();
-        _filterMode = Convert.ToBoolean(Settings.GetSettingValue(SettingsValues.UseQuickLinksFilter));
-        SearchVisible = Convert.ToBoolean(Settings.GetSettingValue(SettingsValues.ShowWebSearch));
-        QuickLinksVisible = Convert.ToBoolean(Settings.GetSettingValue(SettingsValues.ShowQuickLinks));
+        _filterMode = Convert.ToBoolean(SettingsService.GetSettingsValue<bool>(SettingsValues.UseQuickLinksFilterSetting));
+        SearchVisible = Convert.ToBoolean(SettingsService.GetSettingsValue<bool>(SettingsValues.ShowWebSearchSetting));
+        QuickLinksVisible = Convert.ToBoolean(SettingsService.GetSettingsValue<bool>(SettingsValues.ShowQuickLinksSetting));
         if (_filterMode) UpdateSearchEmptyText();
         await JsRunTime.InvokeVoidAsync("SetFocusToElement", SearchBoxElement);
     }
@@ -284,22 +285,22 @@ public partial class Index
     private void SearchVisibleChanged(bool visible)
     {
         SearchVisible = visible;
-        Settings.UpdateSetting(SettingsValues.ShowWebSearch, visible);
-        Settings.SaveAsync();
+        SettingsService.UpdateSetting(SettingsValues.ShowWebSearchSetting, visible);
+        SettingsService.SaveAsync();
     }
 
     private void QuickLinksVisibleChanged(bool value)
     {
         QuickLinksVisible = value;
-        Settings.UpdateSetting(SettingsValues.ShowQuickLinks, value);
-        Settings.SaveAsync();
+        SettingsService.UpdateSetting(SettingsValues.ShowQuickLinksSetting, value);
+        SettingsService.SaveAsync();
     }
 
     private async Task RefreshImageOfDayHandler()
     {
-        Settings.UpdateSetting(SettingsValues.ReQueryImagesAfterTime,
+        SettingsService.UpdateSetting(SettingsValues.ReQueryImagesAfterTimeSetting,
             DateTime.Now.AddDays(-1).ToString(CultureInfo.InvariantCulture));
-        await Settings.SaveAsync();
+        await SettingsService.SaveAsync();
         await GetBingImage();
         StateHasChanged();
     }

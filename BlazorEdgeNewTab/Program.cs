@@ -19,6 +19,7 @@ public static class Program
             builder.RootComponents.Add<HeadOutlet>("head::after");
         });
         builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+        builder.Services.AddSingleton<SettingsService>(); //Add as singleton since settings should be consistent across the app.
         builder.Services.AddSingleton<NewTabService>(); //Add as singleton since there is only one new tab page instance, and we want to preserve state.
         await builder.Build().RunAsync();
     }

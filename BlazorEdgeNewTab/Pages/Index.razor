@@ -1,8 +1,9 @@
 ﻿@page "/index.html"
 @using BlazorEdgeNewTab.Services
 @inherits IndexPage;
-@inject IJSRuntime     JsRunTime;
+@inject IJSRuntime    JsRunTime;
 @inject NewTabService NewTabService;
+@inject SettingsService SettingsService;
 <div class="container-fluid" xmlns="http://www.w3.org/1999/html">
     <div class="row TopMenuRowStyle" id="TopMenuRow">
         <div class="col">

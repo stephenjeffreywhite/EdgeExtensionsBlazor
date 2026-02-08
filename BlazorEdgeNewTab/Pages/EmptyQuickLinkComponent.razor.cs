@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using BlazorEdgeNewTab.Constants;
+using BlazorEdgeNewTab.Models;
+using BlazorEdgeNewTab.Services;
 using Microsoft.AspNetCore.Components;
 using WebExtensions.Net.Bookmarks;
 
@@ -11,6 +13,8 @@ public partial class EmptyQuickLinkComponent
 {
     [Parameter]
     public EventCallback OnSaveEventCallback { get; set; }
+    [Inject]
+    public SettingsService SettingsService { get; set; }
 
     public string NewQuickLinkTitle { get; set; }
     public string NewQuickLinkUrl   { get; set; }
@@ -28,7 +32,7 @@ public partial class EmptyQuickLinkComponent
     private async Task SaveNewBookmark()
     {
         var bookMarkNode =
-            await WebExtensions.Bookmarks.Search(Settings.GetSettingValue(SettingsValues.QuickLinkBookMarkFolder));
+            await WebExtensions.Bookmarks.Search(SettingsService.GetSettingsValue<string>(SettingsValues.QuickLinkBookMarkSetting));
         var bookmarkTreeNodes = bookMarkNode.ToList();
         if (bookmarkTreeNodes.Count() == 1)
         {
