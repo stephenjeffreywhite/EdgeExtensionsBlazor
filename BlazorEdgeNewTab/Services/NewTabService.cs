@@ -94,7 +94,7 @@ public class NewTabService
     public async Task CreateNewBookmarkFolder(IWebExtensionsApi webExtensions, string folderName)
     {
         var bookmarkFolders = await GetBookmarkFolders(webExtensions);
-        if (bookmarkFolders.All(x => x != folderName))
+        if (!bookmarkFolders.Contains(folderName))
         {
             await webExtensions.Bookmarks.Create(new CreateDetails { Title = folderName });
         }
@@ -120,27 +120,19 @@ public class NewTabService
 
     public async Task<List<QuickLink>> SetUpQuickLinks(IWebExtensionsApi webExtensions)
     {
-        var                    quickLinks        = new List<QuickLink>();
-        var                    extensionId       = webExtensions.Runtime.Id;
-        var bookmarkTreeNodes = await GetBookmarkTreeNodes(webExtensions);
-        if (!bookmarkTreeNodes.Any())
+        var quickLinks         = new List<QuickLink>();
+        var extensionId        = webExtensions.Runtime.Id;
+        var bookmarkTreeNodes  = await GetBookmarkTreeNodes(webExtensions);
+        if (!bookmarkTreeNodes.Any()) return quickLinks;
+        var quickLinkBookMarks = await webExtensions.Bookmarks.GetChildren(bookmarkTreeNodes.First().Id);
+        quickLinks.AddRange(quickLinkBookMarks.Select(quickLinkBookMark => new QuickLink
         {
-            var folderName = SettingsService.GetSettingsValue<string>(SettingsValues.QuickLinkBookMarkSetting);
-            await webExtensions.Bookmarks.Create(new CreateDetails
-                {Title = folderName});
-        }
-        else
-        {
-            var quickLinkBookMarks = await webExtensions.Bookmarks.GetChildren(bookmarkTreeNodes.First().Id);
-            quickLinks.AddRange(quickLinkBookMarks.Select(quickLinkBookMark => new QuickLink
-            {
-                QuickLinkTitle = quickLinkBookMark.Title,
-                QuickLinkImageUrl = GetFaviconUrl(extensionId, quickLinkBookMark.Url),
-                QuickLinkUrl = quickLinkBookMark.Url,
-                QuickLinkId = quickLinkBookMark.Id,
-                Visible = true
-            }));
-        }
+            QuickLinkTitle = quickLinkBookMark.Title,
+            QuickLinkImageUrl = GetFaviconUrl(extensionId, quickLinkBookMark.Url),
+            QuickLinkUrl = quickLinkBookMark.Url,
+            QuickLinkId = quickLinkBookMark.Id,
+            Visible = true
+        }));
 
         return quickLinks;
     }
@@ -172,6 +164,7 @@ public class NewTabService
     {
         var bookMarkNode =
             await webExtensions.Bookmarks.Search(SettingsService.GetSettingsValue<string>(SettingsValues.QuickLinkBookMarkSetting));
+        if (bookMarkNode == null) return [];
         var bookmarkTreeNodes = bookMarkNode.ToList();
         return bookmarkTreeNodes;
     }

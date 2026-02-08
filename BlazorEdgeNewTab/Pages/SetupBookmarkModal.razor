@@ -23,7 +23,8 @@
                     </div>
                     <div class="mb-3">
                         <label for="QuickLinkBookMarkFolderName" class="form-label">Selected Quicklink Folder</label>
-                        <input type="text" class="form-control" id="QuickLinkBookMarkFolderName" @bind="@NewQuickLinkBookMarkFolderName" aria-describedby="QuickLinkBookMarkFolderNameHelp" data-bs-theme="dark" />
+                        <InputText Value="@NewQuickLinkBookMarkFolderName" ValueExpression="@(() => NewQuickLinkBookMarkFolderName)" ValueChanged="@QuickLinkFolderChanged" class="form-control"
+                                   aria-describedby="QuickLinkBookMarkFolderNameHelp" data-bs-theme="dark" id="QuickLinkBookMarkFolderName"></InputText>
                         <div data-bs-theme="dark" id="QuickLinkBookMarkFolderNameHelp" class="form-text">Enter the name of the folder you want to use for your quick links. Subfolders are ignored. Enter a new bookmark folder name if you want to create a new folder.</div>
                     </div>
                 </div>
@@ -52,6 +53,12 @@
     private async Task SetNewQuickLinkBookMarkFolderName(string folder)
     {
         NewQuickLinkBookMarkFolderName = folder;
+        await NewQuickLinkBookMarkFolderNameChanged.InvokeAsync(NewQuickLinkBookMarkFolderName);
         await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task QuickLinkFolderChanged(string value)
+    {
+        await NewQuickLinkBookMarkFolderNameChanged.InvokeAsync(value);
     }
 }

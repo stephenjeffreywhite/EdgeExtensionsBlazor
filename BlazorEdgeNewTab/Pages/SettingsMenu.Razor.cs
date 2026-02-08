@@ -24,11 +24,12 @@ public partial class SettingsMenu
     public bool SearchVisible { get; set; }
     [Parameter]
     public EventCallback<bool> SearchVisibleChanged { get; set; }
+    [Parameter]
+    public EventCallback OnResetSettingsCallBack { get; set; }
 
     private void ResetSettings()
     {
-        SettingsService.ResetSettings();
-        SettingsService.SaveAsync();
+        OnResetSettingsCallBack.InvokeAsync();
     }
 
     private void RefreshImageOfDay()

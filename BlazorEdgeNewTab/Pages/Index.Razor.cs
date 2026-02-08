@@ -333,4 +333,12 @@ public partial class Index
         await GetBingImage();
         StateHasChanged();
     }
+
+    private async Task ResetSettings()
+    {
+        SettingsService.ResetSettings();
+        await SettingsService.SaveAsync();
+        NavigationManager.Refresh();
+
+    }
 }
