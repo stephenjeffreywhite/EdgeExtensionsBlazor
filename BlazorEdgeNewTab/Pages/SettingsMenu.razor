@@ -18,11 +18,8 @@
                     <label class="form-check-label" for="showQuickLinksSwitch">Show Quick Links</label>
                 </div>
                 <br/>
-                <label class="form-control-label">Quick Links Bookmark Folder</label>
-                <br/>
-                <label>(sub folders are ignored)</label>
-                <div class="form-text">
-                    <InputText @bind-Value="QuickLinksFolder" class="form-control"></InputText>
+                <div class="row-g-3">
+                    <button class="btn btn-secondary col-auto" @onclick="@(() => OnQuickLinksFolderChangedCallBack.InvokeAsync())">Change Quicklinks Bookmark Folder</button>
                 </div>
                 <br/>
                 <div class="row g-3">

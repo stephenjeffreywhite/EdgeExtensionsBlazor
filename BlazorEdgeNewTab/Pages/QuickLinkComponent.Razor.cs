@@ -8,8 +8,6 @@ namespace BlazorEdgeNewTab.Pages;
 
 public partial class QuickLinkComponent
 {
-    [Inject]
-    IJSRuntime JsRuntime { get; set; }
     [Inject] 
     private NavigationManager NavigationManager { get; set; }
     [Parameter]
@@ -67,17 +65,21 @@ public partial class QuickLinkComponent
         {
             DropOverCssClass = "";
         }
-        if (NewTabPage.DraggingQuickLinkId != null && QuickLinkId != NewTabPage.DraggingQuickLinkId)
+        if (NewTabPage.DraggedQuickLinkId != null && QuickLinkId != NewTabPage.DraggedQuickLinkId)
         {
-            Console.WriteLine($"Dropped {NewTabPage.DraggingQuickLinkId} on {QuickLinkId}");
-            await NewTabPage.OnQuickLinkDragged(NewTabPage.DraggingQuickLinkId, QuickLinkId);
+            Console.WriteLine($"Dropped {NewTabPage.DraggedQuickLinkId} on {QuickLinkId}");
+            //Get the id of the dragged quick link from the parent component, Blazor currently does not let us set data in the DataTransfer object that can be read in the drop event handler,
+            await NewTabPage.OnQuickLinkDragged(NewTabPage.DraggedQuickLinkId, QuickLinkId);
         }
     }
 
     private Task OnDragStart(DragEventArgs arg)
     {
         Console.WriteLine($"Started dragging {QuickLinkId}");
-        NewTabPage.DraggingQuickLinkId = QuickLinkId;
+        // Store the dragged quick link's id in the parent component, Blazor currently does not let us set data in the DataTransfer object that can be read in the drop event handler,
+        // so we are using a property in the parent component to store the dragged quick link's id. In the future if Blazor allows us to set data in the DataTransfer object,
+        // we can remove the DraggedQuickLinkId property from the parent component and use the DataTransfer object instead.
+        NewTabPage.DraggedQuickLinkId = QuickLinkId;
         return Task.CompletedTask;
     }
 

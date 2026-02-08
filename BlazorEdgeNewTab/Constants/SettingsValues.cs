@@ -8,6 +8,8 @@ namespace BlazorEdgeNewTab.Constants;
 
 public static class SettingsValues
 {
+    // Suggested Defaults
+    public const string DefaultBookmarkFolderName = "Edge Quick Links";
     // Keys for settings values
     private const string SearchRegion              = "SearchRegion";
     private const string DisplayMode               = "DisplayMode";
@@ -15,23 +17,20 @@ public static class SettingsValues
     private const string ShowQuickLinks            = "ShowQuickLinks";
     private const string ShowRandomImages          = "ShowRandomImages";
     private const string QuickLinkBookMarkFolder   = "QuickLinkBookmarkFolder";
-    private const string DefaultBookmarkFolderName = "Edge Quick Links";
     private const string ImageOfTheDayCache        = "ImageOfTheDayCache";
     private const string ReQueryImagesAfterTime    = "ReQueryImagesAfterTime";
     private const string UseQuickLinksFilter       = "UseQuickLinksFilter";
-    private const string UseBackUpApi               = "UseBackUpApi";
     //Settings Values with default values
     public static readonly SettingsValue SearchRegionSetting       = new(SearchRegion, "US");
     public static readonly SettingsValue DisplayModeSetting        = new(DisplayMode, "1");
     public static readonly SettingsValue ShowWebSearchSetting      = new(ShowWebSearch, "true");
     public static readonly SettingsValue ShowQuickLinksSetting     = new(ShowQuickLinks, "true");
     public static readonly SettingsValue ShowRandomImagesSetting   = new(ShowRandomImages, "false");
-    public static readonly SettingsValue QuickLinkBookMarkSetting  = new(QuickLinkBookMarkFolder, DefaultBookmarkFolderName);
+    public static readonly SettingsValue QuickLinkBookMarkSetting  = new(QuickLinkBookMarkFolder, null);
     public static readonly SettingsValue ImageOfTheDayCacheSetting = new(ImageOfTheDayCache, null);
     public static readonly SettingsValue ReQueryImagesAfterTimeSetting =
         new(ReQueryImagesAfterTime, DateTime.Now.ToString(CultureInfo.InvariantCulture));
     public static readonly SettingsValue UseQuickLinksFilterSetting = new(UseQuickLinksFilter, "false");
-    public static readonly SettingsValue UseBackUpApiSetting        = new(UseBackUpApi, "false");
     //Storage Area Get Keys
     public static readonly StorageAreaGetKeys StorageKeys = new(
         new List<string>
@@ -45,7 +44,6 @@ public static class SettingsValues
             ImageOfTheDayCacheSetting.Key,
             ReQueryImagesAfterTimeSetting.Key,
             UseQuickLinksFilterSetting.Key,
-            UseBackUpApiSetting.Key
         }
     );
     // Method to initialize the settings dictionary with default values
@@ -62,7 +60,6 @@ public static class SettingsValues
             { SettingsValues.ImageOfTheDayCacheSetting.Key, SettingsValues.ImageOfTheDayCacheSetting.Value },
             { SettingsValues.ReQueryImagesAfterTimeSetting.Key, SettingsValues.ReQueryImagesAfterTimeSetting.Value },
             { SettingsValues.UseQuickLinksFilterSetting.Key, SettingsValues.UseQuickLinksFilterSetting.Value },
-            { SettingsValues.UseBackUpApiSetting.Key, SettingsValues.UseBackUpApiSetting.Value }
         };
     }
 

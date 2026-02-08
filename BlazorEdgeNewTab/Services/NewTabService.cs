@@ -4,6 +4,8 @@ using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Reflection.Metadata.Ecma335;
+using System.Runtime.CompilerServices;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -16,7 +18,7 @@ namespace BlazorEdgeNewTab.Services;
 
 public class NewTabService
 {
-    private readonly string BingImageOfDayUri =
+    private readonly string AllOriginsUri =
         "https://api.allorigins.win/get?url=https%3A//www.bing.com/HPImageArchive.aspx%3Fformat%3Djs%26idx%3D0%26n%3D7";
 
     private HttpClient _httpClient;
@@ -36,24 +38,8 @@ public class NewTabService
         if (DateTime.Now.Date > reQueryTime.Date || SettingsService.GetSettingsValue<string>(SettingsValues.ImageOfTheDayCacheSetting) == null)
         {
             Console.WriteLine("Getting Bing Image of Day from Bing");
-            Console.WriteLine($"Using URL to get image of the day: {BingImageOfDayUri}");
-            _httpClient ??= new HttpClient();
-            var responseDto = await _httpClient.GetFromJsonAsync<AllOriginsResultDto>(BingImageOfDayUri);
-            if (responseDto != null)
-            {
-                var correctedJson = responseDto.contents.Replace("\\", "");
-                dto = JsonSerializer.Deserialize<BingImageOfTheDayDto>(correctedJson, new JsonSerializerOptions());
-                Console.WriteLine($"Dto from bing: {dto.images[0].fullstartdate}");
-                var imageDate = DateTime.ParseExact(dto.images[0].fullstartdate, "yyyyMMddHHmm",
-                    CultureInfo.InvariantCulture);
-                SettingsService.UpdateSetting(SettingsValues.ImageOfTheDayCacheSetting, JsonSerializer.Serialize(dto));
-                SettingsService.UpdateSetting(SettingsValues.ReQueryImagesAfterTimeSetting,
-                    imageDate.ToString(CultureInfo.InvariantCulture));
-                await SettingsService.SaveAsync();
-                return dto;
-            }
-
-            Console.WriteLine("Received no or a null response back from All Origins. :(");
+            Console.WriteLine($"Using URL to get image of the day: {AllOriginsUri}");
+            return await GetBingImagesFromAllOrigins();
         }
         else
         {
@@ -63,6 +49,73 @@ public class NewTabService
         }
 
         return dto;
+    }
+
+    private async Task<BingImageOfTheDayDto> GetBingImagesFromAllOrigins()
+    {
+        BingImageOfTheDayDto dto = new BingImageOfTheDayDto();
+        _httpClient ??= new HttpClient();
+        var responseDto = await _httpClient.GetFromJsonAsync<AllOriginsResultDto>(AllOriginsUri);
+        if (responseDto != null)
+        {
+            var correctedJson = responseDto.contents.Replace("\\", "");
+            dto = JsonSerializer.Deserialize<BingImageOfTheDayDto>(correctedJson, new JsonSerializerOptions());
+            Console.WriteLine($"Dto from bing: {dto.images[0].fullstartdate}");
+            var imageDate = DateTime.ParseExact(dto.images[0].fullstartdate, "yyyyMMddHHmm",
+                CultureInfo.InvariantCulture);
+            SettingsService.UpdateSetting(SettingsValues.ImageOfTheDayCacheSetting, JsonSerializer.Serialize(dto));
+            SettingsService.UpdateSetting(SettingsValues.ReQueryImagesAfterTimeSetting,
+                imageDate.ToString(CultureInfo.InvariantCulture));
+            await SettingsService.SaveAsync();
+        }
+        else
+        {
+            Console.WriteLine("Received no or a null response back from All Origins. :(");
+        }
+        return dto;
+    }
+
+    public async Task<List<string>> GetBookmarkFolders(IWebExtensionsApi webExtensions)
+    {
+        var bookmarkTreeNodes  = await webExtensions.Bookmarks.GetTree() as List<BookmarkTreeNode>;
+        var bookMarkFolderlist = new List<string>();        
+
+        if (bookmarkTreeNodes != null && bookmarkTreeNodes.Any())
+        {
+            foreach (var bookmarkTreeNode in bookmarkTreeNodes)
+            {
+                CollectBookmarkFoldersRecursively(bookmarkTreeNode, bookMarkFolderlist);
+            }
+        }
+
+        return bookMarkFolderlist;
+    }
+
+    public async Task CreateNewBookmarkFolder(IWebExtensionsApi webExtensions, string folderName)
+    {
+        var bookmarkFolders = await GetBookmarkFolders(webExtensions);
+        if (bookmarkFolders.All(x => x != folderName))
+        {
+            await webExtensions.Bookmarks.Create(new CreateDetails { Title = folderName });
+        }
+        SettingsService.UpdateSetting(SettingsValues.QuickLinkBookMarkSetting, folderName);
+        await SettingsService.SaveAsync();
+    }
+
+    private void CollectBookmarkFoldersRecursively(BookmarkTreeNode node, List<string> folderList)
+    {
+        if (string.IsNullOrWhiteSpace(node.Url) && !string.IsNullOrWhiteSpace(node.Title))
+        {
+            folderList.Add(node.Title);
+        }
+
+        if (node.Children != null && node.Children.Any())
+        {
+            foreach (var child in node.Children)
+            {
+                CollectBookmarkFoldersRecursively(child, folderList);
+            }
+        }
     }
 
     public async Task<List<QuickLink>> SetUpQuickLinks(IWebExtensionsApi webExtensions)

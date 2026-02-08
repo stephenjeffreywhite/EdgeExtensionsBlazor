@@ -89,14 +89,12 @@
     background: var(--main-element-bg-color);
     border: none;
     border-radius: 25px;
-    color: whitesmoke;
 
 }
 
 .SearchBoxStyle:focus-within {
     background: var(--main-element-bg-color);
     border: none;
-    color: whitesmoke;
 }
 
 .SearchButtonStyle {

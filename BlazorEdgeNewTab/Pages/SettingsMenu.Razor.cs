@@ -25,20 +25,6 @@ public partial class SettingsMenu
     [Parameter]
     public EventCallback<bool> SearchVisibleChanged { get; set; }
 
-    public string QuickLinksFolder
-    {
-        get => SettingsService.GetSettingsValue<string>(SettingsValues.QuickLinkBookMarkSetting);
-        set
-        {
-            var currentFolderName = SettingsService.GetSettingsValue<string>(SettingsValues.QuickLinkBookMarkSetting);
-            if (string.IsNullOrWhiteSpace(value) || currentFolderName == value) return;
-            Console.WriteLine($"Setting QuickLinks Folder To {value}");
-            SettingsService.UpdateSetting(SettingsValues.QuickLinkBookMarkSetting, value);
-            SettingsService.SaveAsync();
-            OnQuickLinksFolderChangedCallBack.InvokeAsync();
-        }
-    }
-
     private void ResetSettings()
     {
         SettingsService.ResetSettings();

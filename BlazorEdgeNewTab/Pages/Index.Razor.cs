@@ -17,24 +17,30 @@ namespace BlazorEdgeNewTab.Pages;
 
 public partial class Index
 {
-    private List<BingImageOfTheDay>       _bingImages;
-    private bool              _filterMode;
-    private int               _imageArchiveIndex = -1;
-    private BingImageOfTheDay _imageOfTheDay;
-    private List<QuickLink>   QuickLinks { get; set; }
-    private bool              QuickLinksVisible { get; set; }
-    private bool              SearchVisible;
-
-    protected ElementReference SearchBoxElement;
-    private   string           SearchQuery         { get; set; }
-    public    string           ImageDownloadLink   { get; set; }
-    public    string           MuseumCardText      { get; set; }
-    public    string           MuseumCardText2     { get; set; }
-    public    string           MuseumLink          { get; set; }
-    public    string           MuseumLink2         { get; set; }
-    public    string           DraggingQuickLinkId { get; set; }
-
-    public bool FilterMode
+    //Bing Image of the Day
+    private List<BingImageOfTheDay> _bingImages;
+    private bool                    _filterMode;
+    private int                     _imageArchiveIndex = -1;
+    private BingImageOfTheDay       _imageOfTheDay;
+    //Quick Links
+    private List<QuickLink>         QuickLinks        { get; set; }
+    private bool                    QuickLinksVisible { get; set; }
+    //Setup Modal
+    private string       SetUpModalCssClass             { get; set; }
+    private string       NewQuickLinkBookMarkFolderName { get; set; }
+    private List<string> BookmarkFolders                { get; set; } = new List<string>();
+    //Search Box
+    private bool             SearchVisible;
+    private ElementReference SearchBoxElement;
+    private string           SearchQuery       { get; set; }
+    //Download Image URL
+    private string                  ImageDownloadLink { get; set; }
+    //Museum Card
+    private string                  MuseumCardText    { get; set; }
+    private string                  MuseumCardText2   { get; set; }
+    private string                  MuseumLink        { get; set; }
+    private string                  MuseumLink2       { get; set; }
+    private bool FilterMode
     {
         get => _filterMode;
         set
@@ -46,7 +52,8 @@ public partial class Index
         }
     }
 
-    public string SearchEmptyText { get; set; } = "Search the web...";
+    private string SearchEmptyText    { get; set; } = "Search the web...";
+    public  string DraggedQuickLinkId { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -89,11 +96,36 @@ public partial class Index
 
     public async Task SetUpQuickLinks()
     {
-        QuickLinks= await NewTabService.SetUpQuickLinks(WebExtensions);
-        if (QuickLinks.Any())
+        var bookMarkFolder = SettingsService.GetSettingsValue<string>(SettingsValues.QuickLinkBookMarkSetting);
+        if (string.IsNullOrWhiteSpace(bookMarkFolder))
         {
+            SetUpModalCssClass = "show";
+            BookmarkFolders = await NewTabService.GetBookmarkFolders(WebExtensions);
             StateHasChanged();
         }
+        else
+        {
+            QuickLinks = await NewTabService.SetUpQuickLinks(WebExtensions);
+            if (QuickLinks.Any())
+            {
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task SetUpQuickLinksFolder()
+    {
+        if (string.IsNullOrWhiteSpace(NewQuickLinkBookMarkFolderName)) return;
+        await NewTabService.CreateNewBookmarkFolder(WebExtensions, NewQuickLinkBookMarkFolderName);   
+        await SetUpQuickLinks();
+        SetUpModalCssClass = "";
+        StateHasChanged();
+    }
+
+    private async Task SetNewQuickLinkBookMarkFolderName(string folder)
+    {
+        NewQuickLinkBookMarkFolderName = folder;
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task GetBingImage()
@@ -229,8 +261,8 @@ public partial class Index
             {
                 if (string.IsNullOrWhiteSpace(SearchQuery)) return Task.CompletedTask;
                 Console.WriteLine($"Performing a search with query : {SearchQuery}");
-                var searchProps = new SearchProperties {Query = SearchQuery};
-                WebExtensions.Search.Query(new QueryInfo {Text = SearchQuery, Disposition = Disposition.CURRENTTAB, AdditionalData = null, TabId = null}).ConfigureAwait(false);
+                WebExtensions.Search.Query(new QueryInfo
+                    {Text = SearchQuery, Disposition = Disposition.CURRENTTAB, AdditionalData = null, TabId = null});
             }
         }
         catch (Exception e)
@@ -250,8 +282,6 @@ public partial class Index
         return Task.CompletedTask;
     }
 
-
-
     private async Task OnDownloadImageClick() => await WebExtensions.Downloads.Download(new DownloadOptions
     {
         Url = ImageDownloadLink,
@@ -261,7 +291,10 @@ public partial class Index
 
     private async Task QuickLinksFolderChangedHandler()
     {
-        await SetUpQuickLinks();
+        SetUpModalCssClass = "show";
+        BookmarkFolders = await NewTabService.GetBookmarkFolders(WebExtensions);
+        NewQuickLinkBookMarkFolderName =  SettingsService.GetSettingsValue<string>(SettingsValues.QuickLinkBookMarkSetting);
+        await InvokeAsync(StateHasChanged);
     }
 
     public async Task EditQuickLink(string quickLinkId, string newTitle, string newUrl)
