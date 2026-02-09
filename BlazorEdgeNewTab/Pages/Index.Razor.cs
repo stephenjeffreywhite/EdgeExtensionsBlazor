@@ -274,7 +274,7 @@ public partial class Index
     private Task UseCopilot(MouseEventArgs arg)
     {
         Console.WriteLine("Use Co-Pilot Clicked");
-        NavigationManager.NavigateTo("https://bing.com/chat");
+        NavigationManager.NavigateTo("https://copilot.microsoft.com/");
         return Task.CompletedTask;
     }
 

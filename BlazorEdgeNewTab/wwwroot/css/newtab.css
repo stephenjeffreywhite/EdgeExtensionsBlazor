@@ -272,15 +272,13 @@
 .QuickLinkHoverButton {
     position: relative;
     display: inline;
-    top: 5%;
+    top: -40%;
     z-index: 10;
     right: 25%;
     opacity: 0.05;
     filter: invert(100%);
-    border: 2px solid;
-    border-radius: 50px;
-    height: 20px;
-    width: 22px;
+    height: 24px;
+    width: 24px;
     transition: ease-in;
 
 }
