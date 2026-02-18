@@ -34,6 +34,12 @@ Blazor Edge New Tab uses the Chromium / WebExtensions API to access the icons us
 Blazor Edge New Tab uses Microsoft Bing's image of the day feed to display the image backgrounds. No personal data of
 any kind is intentionally or explicitly sent to Microsoft.
 
+## Peapix
+Blazor Edge New Tab uses Peapix's image feed to display the image backgrounds. No personal data of any kind is intentionally or explicitly sent to Peapix.
+
+## Icons8
+Blazor Edge New Tab uses Icons from Icons8 for some of its icons. No personal data of any kind is intentionally or explicitly sent to Icons8.
+
 ## Other Search Providers
 
 Since Blazor Edge New Tab allows you to execute search queries against your default search provider, you should review
