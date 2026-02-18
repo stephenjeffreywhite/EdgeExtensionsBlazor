@@ -25,6 +25,10 @@ public partial class SettingsMenu
     [Parameter]
     public EventCallback<bool> SearchVisibleChanged { get; set; }
     [Parameter]
+    public bool UsePeaPix { get; set; }
+    [Parameter]
+    public EventCallback<bool> UsePeaPixChanged { get; set; }
+    [Parameter]
     public EventCallback OnResetSettingsCallBack { get; set; }
 
     private void ResetSettings()

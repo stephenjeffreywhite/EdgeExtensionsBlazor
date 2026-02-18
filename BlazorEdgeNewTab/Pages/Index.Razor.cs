@@ -8,9 +8,11 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using WebExtensions.Net.Bookmarks;
 using WebExtensions.Net.Downloads;
+using WebExtensions.Net.GeckoProfiler;
 using WebExtensions.Net.Search;
 
 namespace BlazorEdgeNewTab.Pages;
@@ -54,16 +56,25 @@ public partial class Index
 
     private string SearchEmptyText    { get; set; } = "Search the web...";
     public  string DraggedQuickLinkId { get; set; }
+    public  bool   UsePeaPix          { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JsRunTime.InvokeVoidAsync("SetFocusToElement", SearchBoxElement);
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
-        //NOTE - Do NOT get settings until the quick links are set up. The elements need to exist in the dom first or the
-        //QuickLinksVisible property will cause a nasty exception because it's trying to work on an HTML element that isn't drawn yet.
-        await SettingsService.LoadSettingsAsync(WebExtensions).ContinueWith(_ => SetUpQuickLinks());
-        await GetBingImage();
+        await SettingsService.LoadSettingsAsync(WebExtensions);
+        await SetUpQuickLinks();
+        _ = GetBingImageWithTimeout();
         _filterMode = Convert.ToBoolean(SettingsService.GetSettingsValue<bool>(SettingsValues.UseQuickLinksFilterSetting));
         SearchVisible = Convert.ToBoolean(SettingsService.GetSettingsValue<bool>(SettingsValues.ShowWebSearchSetting));
         QuickLinksVisible = Convert.ToBoolean(SettingsService.GetSettingsValue<bool>(SettingsValues.ShowQuickLinksSetting));
+        UsePeaPix = Convert.ToBoolean(SettingsService.GetSettingsValue<bool>(SettingsValues.UsePeaPixSetting));
         if (_filterMode) UpdateSearchEmptyText();
         await JsRunTime.InvokeVoidAsync("SetFocusToElement", SearchBoxElement);
     }
@@ -124,11 +135,12 @@ public partial class Index
 
 
 
-    private async Task GetBingImage()
+    private async Task GetBingImageWithTimeout()
     {
         try
         {
-            var dto = await NewTabService.GetImageOfDayDto();
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2.5));
+            var       dto = await NewTabService.GetImageOfDayDto(cts.Token);
             if (dto != null)
             {
                 _imageOfTheDay = dto.images[0];
@@ -145,6 +157,10 @@ public partial class Index
             {
                 Console.WriteLine("The image collection was null, we probably screwed up deserializing the JSON ☹");
             }
+        }
+        catch (OperationCanceledException)
+        {
+            Console.WriteLine("We timed out trying to get the Bing Image of the Day. 😡");
         }
         catch (Exception e)
         {
@@ -228,7 +244,16 @@ public partial class Index
 
     private async Task SetBackgroundImage(string url)
     {
-        var fullImagePath = "https://bing.com" + url;
+        var usePeaPix = SettingsService.GetSettingsValue<bool>(SettingsValues.UsePeaPixSetting);
+        string fullImagePath;
+        if (usePeaPix)
+        {
+            fullImagePath = url;
+        }
+        else
+        {
+            fullImagePath = "https://bing.com" + url;
+        }
         await JsRunTime.InvokeVoidAsync("setBackgroundImage1", fullImagePath);
         ImageDownloadLink = fullImagePath.Replace("&pid=hp", "");
     }
@@ -330,8 +355,15 @@ public partial class Index
         SettingsService.UpdateSetting(SettingsValues.ReQueryImagesAfterTimeSetting,
             DateTime.Now.AddDays(-1).ToString(CultureInfo.InvariantCulture));
         await SettingsService.SaveAsync();
-        await GetBingImage();
+        await GetBingImageWithTimeout();
         StateHasChanged();
+    }
+
+    private async Task UsePeaPixChanged(bool value)
+    {
+        UsePeaPix = value;
+        SettingsService.UpdateSetting(SettingsValues.UsePeaPixSetting, value);
+        await SettingsService.SaveAsync();
     }
 
     private async Task ResetSettings()

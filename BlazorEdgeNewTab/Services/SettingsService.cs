@@ -16,11 +16,23 @@ public class SettingsService
 
     public StorageArea Storage { get; set; }
 
+
+    /// <summary>
+    /// Resets all application settings to their default values.
+    /// </summary>
+    /// <remarks>Call this method to restore the original configuration of the application. This is useful if
+    /// settings have been modified during runtime and need to be reverted to their initial state.</remarks>
     public void ResetSettings()
     {
         SettingsDictionary = SettingsValues.InitializeSettingsDictionary();
     }
 
+    /// <summary>
+    /// Gets the setting value indicated by the provided key. Returns the default value if the setting is not found
+    /// </summary>
+    /// <typeparam name="T">Type of the setting value</typeparam>
+    /// <param name="settingValue">The setting value to retrieve</param>
+    /// <returns>The actual stored setting value. If the setting is not found, returns the default value</returns>
     public T GetSettingsValue<T>(SettingsValue settingValue)
     {
         var foundSetting = SettingsDictionary.GetValueOrDefault(settingValue.Key);
@@ -51,7 +63,7 @@ public class SettingsService
     {
         Console.WriteLine("Saving settings...");
         return Storage?.Set(SettingsDictionary) ?? ValueTask.CompletedTask;
-    }
+    }    
 
     /// <summary>
     ///     Loads the settings dictionary for the settings class from the browser storage
@@ -75,7 +87,10 @@ public class SettingsService
             await SaveAsync();
         }
     }
-
+    /// <summary>
+    /// Updates the internal settings dictionary with the provided key value pairs
+    /// </summary>
+    /// <param name="keyValuePairs"></param>
     private void UpdateDictionary(Dictionary<string, string> keyValuePairs)
     {
         SettingsDictionary = keyValuePairs;

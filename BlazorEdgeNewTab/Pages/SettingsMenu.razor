@@ -18,6 +18,11 @@
                     <label class="form-check-label" for="showQuickLinksSwitch">Show Quick Links</label>
                 </div>
                 <br/>
+                <div class="form-check form-switch">
+                    <InputCheckbox Value="@UsePeaPix" Id="usePeaPixSwitch" class="form-check-input" ValueExpression="@(()=> UsePeaPix)" ValueChanged="@((bool value) => UsePeaPixChanged.InvokeAsync(value))" />
+                    <label class="form-check-label" for="usePeaPixSwitch">Use PeaPix For Images</label>
+                </div>
+                <br/>
                 <div class="row-g-3">
                     <button class="btn btn-secondary col-auto" @onclick="@(() => ChangeQuickLinkFolder.InvokeAsync())">Change Quicklinks Bookmark Folder</button>
                 </div>

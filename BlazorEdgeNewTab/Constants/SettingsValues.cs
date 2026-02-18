@@ -6,6 +6,9 @@ using WebExtensions.Net.Storage;
 
 namespace BlazorEdgeNewTab.Constants;
 
+/// <summary>
+/// Settings values and their default values for the application. The settings values are used as keys for storing and retrieving settings from the extension storage.
+/// </summary>
 public static class SettingsValues
 {
     // Suggested Defaults
@@ -20,6 +23,7 @@ public static class SettingsValues
     private const string ImageOfTheDayCache        = "ImageOfTheDayCache";
     private const string ReQueryImagesAfterTime    = "ReQueryImagesAfterTime";
     private const string UseQuickLinksFilter       = "UseQuickLinksFilter";
+    private const string UsePeaPix                 = "UsePeaPix";
     //Settings Values with default values
     public static readonly SettingsValue SearchRegionSetting       = new(SearchRegion, "US");
     public static readonly SettingsValue DisplayModeSetting        = new(DisplayMode, "1");
@@ -31,7 +35,11 @@ public static class SettingsValues
     public static readonly SettingsValue ReQueryImagesAfterTimeSetting =
         new(ReQueryImagesAfterTime, DateTime.Now.ToString(CultureInfo.InvariantCulture));
     public static readonly SettingsValue UseQuickLinksFilterSetting = new(UseQuickLinksFilter, "false");
-    //Storage Area Get Keys
+    public static readonly SettingsValue UsePeaPixSetting = new(UsePeaPix, "true");
+
+    /// <summary>
+    /// The list of storage keys used for retrieving settings from storage
+    /// </summary>
     public static readonly StorageAreaGetKeys StorageKeys = new(
         new List<string>
         {
@@ -44,9 +52,13 @@ public static class SettingsValues
             ImageOfTheDayCacheSetting.Key,
             ReQueryImagesAfterTimeSetting.Key,
             UseQuickLinksFilterSetting.Key,
+            UsePeaPixSetting.Key,
         }
     );
-    // Method to initialize the settings dictionary with default values
+    /// <summary>
+    /// Initializes the settings dictionary with default values
+    /// </summary>
+    /// <returns>A dictionary containing the default settings key-value pairs</returns>
     public static Dictionary<string, string> InitializeSettingsDictionary()
     {
         return new Dictionary<string, string>
@@ -60,6 +72,7 @@ public static class SettingsValues
             { SettingsValues.ImageOfTheDayCacheSetting.Key, SettingsValues.ImageOfTheDayCacheSetting.Value },
             { SettingsValues.ReQueryImagesAfterTimeSetting.Key, SettingsValues.ReQueryImagesAfterTimeSetting.Value },
             { SettingsValues.UseQuickLinksFilterSetting.Key, SettingsValues.UseQuickLinksFilterSetting.Value },
+            { SettingsValues.UsePeaPixSetting.Key, SettingsValues.UsePeaPixSetting.Value },
         };
     }
 
