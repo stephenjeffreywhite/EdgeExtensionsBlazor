@@ -13,10 +13,13 @@ This is a new tab page extension that is similar to the new tab page for Microso
 - Creates quick links via a specified Book Mark folder. Unlike with Edge, you can have as many quick links as you want.*
 - Features app link menu for Microsoft 365. Some of the links are different than the one for Edge (I.E. Visual Studio and Azure).
 - Allows you to search using your default search engine.
+- You can rearrange Quicklinks / Bookmarks by dragging them on top of each other to swap their places.
+- Renaming and Deleting Quicklinks / Bookmarks is possible via the hover buttons on the edge of each Quicklink.
 
- *The bookmarks folder is defaulted to Edge Quick Links; you can change it in the settings menu
+ *Having a lot of Bookmarks in a particular folder will however make the page get bigger and may require you to scroll down.
 
-**Note:**  The extension uses the same APIs that Microsoft uses for Bing via a proxy at allorigins.win (due to Bing using CORS). As a result, it may at times take a little bit of time for the image of the day to show up when the extension fires up for the first time on a particular day. Also, allorigins.win sometimes may be down due to issues on their side, which is beyond my control. I am looking into alternatives but for now this is a known issue.
+**Note:** By default this extension uses Peapix.com's API for the Bing images of the day. This is because Bing's official API has CORS restrictions. Unfortunately, Peapix does not return the quiz question links for the museum cards on the new tab page.
+**Note 2**: In the settings, you can use the old version of the extension's CORS Proxy, AllOrigins.Win for the Bing Images, but I do not recommend using it since AllOrigins.Win is not reliable. I am looking into a different proxy.
 
 ### Get Blazor New Tab from the Edge Add-Ons Website:
 
@@ -27,7 +30,7 @@ This is a new tab page extension that is similar to the new tab page for Microso
 # How To Build:
 
 - This project has no external dependencies besides the ones Blazor/Asp.NET rely upon and one specific NuGet package for allowing Blazor to to run as a Browser Extension.
-- You can build it using either the Dot Net 9 SDK CLI, JetBrains Rider or Visual Studio 2022 (latest version; edition does not matter).
+- You can build it using either the Dot Net 10 SDK CLI, JetBrains Rider or Visual Studio 2026 (latest version; edition does not matter).
 - When you build the project, the output folder will contain a browserextension folder. This is the folder that you need to load for the unpacked extension via your extensions menu in Edge/Chromium
 
 
@@ -37,9 +40,9 @@ This is a new tab page extension that is similar to the new tab page for Microso
 
 2) Your new tab page should be replaced with one provided by the extension.
 
-3) The new tab page should load the bing image of the day, assuming allorigins.win and bing are available.
+3) The new tab page should load the bing image of the day, assuming Peapix (or allorigins.win) and bing are available.
 
-4) The extension should display quick link tiles below the web search if you have a folder in your favorites named "Edge Quick Links". If you want to use a different folder to test, you can change the name of the default folder using the settings menu (click the gear button in the upper right hand corner of the new tab page to access).
+4) If you are running the Extension for the first time, it will prompt you to select a Bookmarks folder to use for your Quicklinks. You can change this in the future via the button in the settings menu in the upper right hand corner.
 
 5) The web search should take you to your default search provider page (preferably Bing) if you type in text into the web search text box and hit enter or click the magnifying glass / search button. 
 
@@ -52,3 +55,7 @@ This is a new tab page extension that is similar to the new tab page for Microso
 9) The Waffle button in the upper left hand corner should display a drop down with links to various MS365 apps and services. 
 
 10) The rewards button / badge in the upper right hand corner (to the right of the settings button) should take you to the MS Rewards site.
+
+11) You can rearrange bookmarks by swapping their positions by clicking and dragging QuickLinks on top of eachother. 
+
+12) You can rename or delete Quicklinks (bookmarks) by the hover buttons on the edge of each Quicklink. 

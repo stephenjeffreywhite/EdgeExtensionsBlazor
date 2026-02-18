@@ -1,17 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 	
 	<PropertyGroup>
-		<TargetFramework>net9.0</TargetFramework>
-		<AssemblyVersion>2024.0407.2.0</AssemblyVersion>
-		<FileVersion>2024.0407.2.0</FileVersion>
-		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
-		<LangVersion>10</LangVersion>
+		<TargetFramework>net10.0</TargetFramework>
+		<AssemblyVersion>2026.0130.1.0</AssemblyVersion>
+		<FileVersion>2026.0130.1.0</FileVersion>
+    <NoWarn>$(NoWarn);NU1504;NU1605</NoWarn>
 	</PropertyGroup>
 	
 	<ItemGroup>
-		<PackageReference Include="Blazor.BrowserExtension" Version="3.1.2" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.6" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.6" PrivateAssets="all" />
+		<PackageReference Include="Blazor.BrowserExtension" Version="4.0.2" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.2" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.2" PrivateAssets="all" />
 	</ItemGroup>
 	
 	<ItemGroup>
@@ -19,11 +18,9 @@
 	</ItemGroup>
 	
 	<ItemGroup>
+		<Content Remove="wwwroot\css\bootstrap.min.css.map" />
 		<Content Remove="wwwroot\jsInteropScripts.js" />
-	</ItemGroup>
-	
-	<ItemGroup>
-		<Folder Include="wwwroot\css\" />
+		<Content Remove="wwwroot\js\bootstrap.bundle.min.js.map" />
 	</ItemGroup>
 
 </Project>

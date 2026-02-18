@@ -1,6 +1,7 @@
-﻿@using BlazorEdgeNewTab.Constants
+﻿@using BlazorEdgeNewTab.Services
+@inject SettingsService SettingsService
 <div class="dropdown">
-    <button class="dropdown-toggle TopMenuIconStyle btn" type="button" id="settingsDropDown" data-bs-toggle="dropdown" aria-expanded="false" title="Settings">
+    <button class="dropdown-toggle TopMenuIconStyle btn" type="button" id="settingsDropDown" data-bs-toggle="dropdown" aria-expanded="false" title="Settings" data-bs-auto-close="false">
         <img src="\icons\fluent_gear.png" alt="waffle icon">
     </button>
     <div class="dropdown-menu p-4 M365PopUp" style="min-width: 450px" aria-labelledby="settingsDropDown">
@@ -8,20 +9,22 @@
             <h4>Settings</h4>
             <EditForm Model="this">
                 <div class="form-check form-switch">
-                    <InputCheckbox @bind-Value="@SearchVisible" Id="showSearchSwitch" class="form-check-input"/>
+                    <InputCheckbox Value="@SearchVisible" Id="showSearchSwitch" class="form-check-input" ValueExpression="@(()=> SearchVisible)" ValueChanged="@((bool value) => SearchVisibleChanged.InvokeAsync(value))" />
                     <label class="form-control-label" for="showSearchSwitch">Show Web Search</label>
                 </div>
                 <br/>
                 <div class="form-check form-switch">
-                    <InputCheckbox @bind-Value="@QuickLinksVisible" Id="showQuickLinksSwitch" class="form-check-input"/>
+                    <InputCheckbox Value="@QuickLinksVisible" Id="showQuickLinksSwitch" class="form-check-input" ValueExpression="@(()=> QuickLinksVisible)" ValueChanged="@((bool value) => QuickLinksVisibleChanged.InvokeAsync(value))" />
                     <label class="form-check-label" for="showQuickLinksSwitch">Show Quick Links</label>
                 </div>
                 <br/>
-                <label class="form-control-label">Quick Links Bookmark Folder</label>
+                <div class="form-check form-switch">
+                    <InputCheckbox Value="@UsePeaPix" Id="usePeaPixSwitch" class="form-check-input" ValueExpression="@(()=> UsePeaPix)" ValueChanged="@((bool value) => UsePeaPixChanged.InvokeAsync(value))" />
+                    <label class="form-check-label" for="usePeaPixSwitch">Use PeaPix For Images</label>
+                </div>
                 <br/>
-                <label>(sub folders are ignored)</label>
-                <div class="form-text">
-                    <InputText @bind-Value="QuickLinksFolder" class="form-control"></InputText>
+                <div class="row-g-3">
+                    <button class="btn btn-secondary col-auto" @onclick="@(() => ChangeQuickLinkFolder.InvokeAsync())">Change Quicklinks Bookmark Folder</button>
                 </div>
                 <br/>
                 <div class="row g-3">

@@ -89,14 +89,12 @@
     background: var(--main-element-bg-color);
     border: none;
     border-radius: 25px;
-    color: whitesmoke;
 
 }
 
 .SearchBoxStyle:focus-within {
     background: var(--main-element-bg-color);
     border: none;
-    color: whitesmoke;
 }
 
 .SearchButtonStyle {
@@ -266,27 +264,30 @@
     background: var(--main-bg-hover);
 }
 
-.QuickLinkDeleteButton {
+.QuickLinkContentDragOver {
+    opacity: 0.75;
+    background: var(--main-bg-focus);
+}
+
+.QuickLinkHoverButton {
     position: relative;
     display: inline;
-    top: 5%;
+    top: -40%;
     z-index: 10;
     right: 25%;
     opacity: 0.05;
     filter: invert(100%);
-    border: 2px solid;
-    border-radius: 50px;
-    height: 20px;
-    width: 22px;
+    height: 24px;
+    width: 24px;
     transition: ease-in;
 
 }
 
-.QuickLinkDeleteButton:hover {
+.QuickLinkHoverButton:hover {
     opacity: 0.6;
 }
 
-.QuickLinkDeleteButton:active {
+.QuickLinkHoverButton:active {
     opacity: 0.8;
 }
 
@@ -308,7 +309,8 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-
+    pointer-events: none;
+    user-select: none;
 }
 
 .QuickLinkTitle {
@@ -329,6 +331,13 @@
     width: 100%;
     display: flex;
     flex-wrap: wrap;
+}
+
+.QuickLinkDropDownHolder {
+    position: relative;
+    display: inline;
+    top: 5%;
+    left: 5%;
 }
 
 /* Pre-loading Animation */

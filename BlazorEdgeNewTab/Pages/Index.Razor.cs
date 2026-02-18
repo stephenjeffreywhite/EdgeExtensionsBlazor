@@ -1,59 +1,82 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
-using BlazorEdgeNewTab.Constants;
+﻿using BlazorEdgeNewTab.Constants;
 using BlazorEdgeNewTab.Models;
+using BlazorEdgeNewTab.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using WebExtensions.Net.Bookmarks;
 using WebExtensions.Net.Downloads;
+using WebExtensions.Net.GeckoProfiler;
+using WebExtensions.Net.Search;
 
 namespace BlazorEdgeNewTab.Pages;
 
 public partial class Index
 {
-    private List<BingImageOfTheDay>       _bingImages;
-    private bool              _filterMode;
-    private int               _imageArchiveIndex = -1;
-    private BingImageOfTheDay _imageOfTheDay;
-    private List<QuickLink>   QuickLinks { get; set; }
-    private bool              QuickLinksVisible { get; set; }
-    private bool              _searchVisible;
-
-    protected ElementReference SearchBoxElement;
-    private   string           SearchQuery        { get; set; }
-    public    string           ImageDownloadLink  { get; set; }
-    public    string           MuseumCardText     { get; set; }
-    public    string           MuseumCardText2    { get; set; }
-    public    string           MuseumLink         { get; set; }
-    public    string           MuseumLink2        { get; set; }
-    public    SettingsMenu     SettingsMenuNewTab { get; set; }
-
-    public bool FilterMode
+    //Bing Image of the Day
+    private List<BingImageOfTheDay> _bingImages;
+    private bool                    _filterMode;
+    private int                     _imageArchiveIndex = -1;
+    private BingImageOfTheDay       _imageOfTheDay;
+    //Quick Links
+    private List<QuickLink>         QuickLinks        { get; set; }
+    private bool                    QuickLinksVisible { get; set; }
+    //Setup Modal
+    private bool         ShowSetupModal                 { get; set; }
+    private string       NewQuickLinkBookMarkFolderName { get; set; }
+    private List<string> BookmarkFolders                { get; set; } = new List<string>();
+    //Search Box
+    private bool             SearchVisible;
+    private ElementReference SearchBoxElement;
+    private string           SearchQuery       { get; set; }
+    //Download Image URL
+    private string                  ImageDownloadLink { get; set; }
+    //Museum Card
+    private string                  MuseumCardText    { get; set; }
+    private string                  MuseumCardText2   { get; set; }
+    private string                  MuseumLink        { get; set; }
+    private string                  MuseumLink2       { get; set; }
+    private bool FilterMode
     {
         get => _filterMode;
         set
         {
             _filterMode = value;
             UpdateSearchEmptyText();
-            Settings.UpdateSetting(SettingsValues.UseQuickLinksFilter, value.ToString());
-            Settings.SaveAsync();
+            SettingsService.UpdateSetting(SettingsValues.UseQuickLinksFilterSetting, value.ToString());
+            SettingsService.SaveAsync();
         }
     }
 
-    public string SearchEmptyText { get; set; } = "Search the web...";
+    private string SearchEmptyText    { get; set; } = "Search the web...";
+    public  string DraggedQuickLinkId { get; set; }
+    public  bool   UsePeaPix          { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JsRunTime.InvokeVoidAsync("SetFocusToElement", SearchBoxElement);
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
-        //NOTE - Do NOT get settings until the quick links are set up. The elements need to exist in the dom first or the
-        //QuickLinksVisible property will cause a nasty exception because it's trying to work on an HTML element that isn't drawn yet.
-        await Settings.LoadSettingsAsync(WebExtensions).ContinueWith(_ => SetUpQuickLinks());
-        await GetBingImagesForNewTab();
-        _filterMode = Convert.ToBoolean(Settings.GetSettingValue(SettingsValues.UseQuickLinksFilter));
+        await SettingsService.LoadSettingsAsync(WebExtensions);
+        await SetUpQuickLinks();
+        _ = GetBingImageWithTimeout();
+        _filterMode = Convert.ToBoolean(SettingsService.GetSettingsValue<bool>(SettingsValues.UseQuickLinksFilterSetting));
+        SearchVisible = Convert.ToBoolean(SettingsService.GetSettingsValue<bool>(SettingsValues.ShowWebSearchSetting));
+        QuickLinksVisible = Convert.ToBoolean(SettingsService.GetSettingsValue<bool>(SettingsValues.ShowQuickLinksSetting));
+        UsePeaPix = Convert.ToBoolean(SettingsService.GetSettingsValue<bool>(SettingsValues.UsePeaPixSetting));
         if (_filterMode) UpdateSearchEmptyText();
-        await JS.InvokeVoidAsync("SetFocusToElement", SearchBoxElement);
+        await JsRunTime.InvokeVoidAsync("SetFocusToElement", SearchBoxElement);
     }
 
     private void UpdateSearchEmptyText()
@@ -61,22 +84,6 @@ public partial class Index
         SearchEmptyText = _filterMode
             ? "Type in a filter and hit enter to apply it. Blank filter resets the filter."
             : "Search the web...";
-    }
-
-    private async Task GetBingImagesForNewTab()
-    {
-        await GetBingImage();
-    }
-
-    protected override Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            _searchVisible = SettingsMenuNewTab.SearchVisible;
-            QuickLinksVisible = SettingsMenuNewTab.QuickLinksVisible;
-        }
-
-        return base.OnAfterRenderAsync(firstRender);
     }
 
     private void FilterQuickLinks()
@@ -100,18 +107,40 @@ public partial class Index
 
     public async Task SetUpQuickLinks()
     {
-        QuickLinks= await NewTabService.SetUpQuickLinks(WebExtensions);
-        if (QuickLinks.Any())
+        var bookMarkFolder = SettingsService.GetSettingsValue<string>(SettingsValues.QuickLinkBookMarkSetting);
+        if (string.IsNullOrWhiteSpace(bookMarkFolder))
         {
+            BookmarkFolders = await NewTabService.GetBookmarkFolders(WebExtensions);
+            ShowSetupModal = true;
             StateHasChanged();
+        }
+        else
+        {
+            QuickLinks = await NewTabService.SetUpQuickLinks(WebExtensions);
+            if (QuickLinks.Any())
+            {
+                StateHasChanged();
+            }
         }
     }
 
-    private async Task GetBingImage()
+    private async Task SetUpQuickLinksFolder()
+    {
+        if (string.IsNullOrWhiteSpace(NewQuickLinkBookMarkFolderName)) return;
+        await NewTabService.CreateNewBookmarkFolder(WebExtensions, NewQuickLinkBookMarkFolderName);   
+        await SetUpQuickLinks();
+        ShowSetupModal = false;
+        StateHasChanged();
+    }
+
+
+
+    private async Task GetBingImageWithTimeout()
     {
         try
         {
-            var dto = await NewTabService.GetImageOfDayDto();
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2.5));
+            var       dto = await NewTabService.GetImageOfDayDto(cts.Token);
             if (dto != null)
             {
                 _imageOfTheDay = dto.images[0];
@@ -128,6 +157,10 @@ public partial class Index
             {
                 Console.WriteLine("The image collection was null, we probably screwed up deserializing the JSON ☹");
             }
+        }
+        catch (OperationCanceledException)
+        {
+            Console.WriteLine("We timed out trying to get the Bing Image of the Day. 😡");
         }
         catch (Exception e)
         {
@@ -211,8 +244,17 @@ public partial class Index
 
     private async Task SetBackgroundImage(string url)
     {
-        var fullImagePath = "https://bing.com" + url;
-        await JS.InvokeVoidAsync("setBackgroundImage1", fullImagePath).ConfigureAwait(false);
+        var usePeaPix = SettingsService.GetSettingsValue<bool>(SettingsValues.UsePeaPixSetting);
+        string fullImagePath;
+        if (usePeaPix)
+        {
+            fullImagePath = url;
+        }
+        else
+        {
+            fullImagePath = "https://bing.com" + url;
+        }
+        await JsRunTime.InvokeVoidAsync("setBackgroundImage1", fullImagePath);
         ImageDownloadLink = fullImagePath.Replace("&pid=hp", "");
     }
 
@@ -240,10 +282,8 @@ public partial class Index
             {
                 if (string.IsNullOrWhiteSpace(SearchQuery)) return Task.CompletedTask;
                 Console.WriteLine($"Performing a search with query : {SearchQuery}");
-                // The code below always throws an exception; we are using JS Interop to work around this for now...
-                // var searchProps = new SearchProperties {Query = SearchQuery};
-                //await WebExtensions.Search.Query(new QueryInfo {Text = SearchQuery, Disposition = Disposition.CurrentTab, AdditionalData = null, TabId = null}).ConfigureAwait(false);
-                JS.InvokeVoidAsync("runSearchQuery", SearchQuery).ConfigureAwait(false);
+                WebExtensions.Search.Query(new QueryInfo
+                    {Text = SearchQuery, Disposition = Disposition.CURRENTTAB, AdditionalData = null, TabId = null});
             }
         }
         catch (Exception e)
@@ -259,24 +299,34 @@ public partial class Index
     private Task UseCopilot(MouseEventArgs arg)
     {
         Console.WriteLine("Use Co-Pilot Clicked");
-        NavigationManager.NavigateTo("https://bing.com/chat");
+        NavigationManager.NavigateTo("https://copilot.microsoft.com/");
         return Task.CompletedTask;
     }
 
-
-
-    private async Task OnDownloadImageClick()
+    private async Task OnDownloadImageClick() => await WebExtensions.Downloads.Download(new DownloadOptions
     {
-        await WebExtensions.Downloads.Download(new DownloadOptions
-        {
-            Url = ImageDownloadLink,
-            SaveAs = true,
-            Filename = $"{GetImageNameForIndex(_imageArchiveIndex)}.jpeg"
-        });
+        Url = ImageDownloadLink,
+        SaveAs = true,
+        Filename = $"{GetImageNameForIndex(_imageArchiveIndex)}.jpeg"
+    });
+
+    private async Task EditQuickLinkFolder()
+    {
+        ShowSetupModal = true;
+        BookmarkFolders = await NewTabService.GetBookmarkFolders(WebExtensions);
+        NewQuickLinkBookMarkFolderName =  SettingsService.GetSettingsValue<string>(SettingsValues.QuickLinkBookMarkSetting);
+        await InvokeAsync(StateHasChanged);
     }
 
-    private async Task QuickLinksFolderChangedHandler()
+    public async Task EditQuickLink(string quickLinkId, string newTitle, string newUrl)
     {
+        await WebExtensions.Bookmarks.Update(quickLinkId, new Changes { Title = newTitle, Url = newUrl });
+        await SetUpQuickLinks();
+    }
+
+    public async Task OnQuickLinkDragged(string droppedQuickLinkId, string destinationQuickLinkId)
+    {
+        await NewTabService.SwapQuickLinks(WebExtensions, droppedQuickLinkId, destinationQuickLinkId);
         await SetUpQuickLinks();
     }
 
@@ -286,22 +336,41 @@ public partial class Index
         await SetUpQuickLinks();
     }
 
-    private void SearchVisibleChanged()
+    private void SearchVisibleChanged(bool visible)
     {
-        _searchVisible = SettingsMenuNewTab.SearchVisible;
+        SearchVisible = visible;
+        SettingsService.UpdateSetting(SettingsValues.ShowWebSearchSetting, visible);
+        SettingsService.SaveAsync();
     }
 
-    private void QuickLinksVisibleChanged()
+    private void QuickLinksVisibleChanged(bool value)
     {
-        QuickLinksVisible = SettingsMenuNewTab.QuickLinksVisible;
+        QuickLinksVisible = value;
+        SettingsService.UpdateSetting(SettingsValues.ShowQuickLinksSetting, value);
+        SettingsService.SaveAsync();
     }
 
     private async Task RefreshImageOfDayHandler()
     {
-        Settings.UpdateSetting(SettingsValues.ReQueryImagesAfterTime,
+        SettingsService.UpdateSetting(SettingsValues.ReQueryImagesAfterTimeSetting,
             DateTime.Now.AddDays(-1).ToString(CultureInfo.InvariantCulture));
-        await Settings.SaveAsync();
-        await GetBingImagesForNewTab();
+        await SettingsService.SaveAsync();
+        await GetBingImageWithTimeout();
         StateHasChanged();
+    }
+
+    private async Task UsePeaPixChanged(bool value)
+    {
+        UsePeaPix = value;
+        SettingsService.UpdateSetting(SettingsValues.UsePeaPixSetting, value);
+        await SettingsService.SaveAsync();
+    }
+
+    private async Task ResetSettings()
+    {
+        SettingsService.ResetSettings();
+        await SettingsService.SaveAsync();
+        NavigationManager.Refresh();
+
     }
 }

@@ -17,4 +17,17 @@ public class BingImageOfTheDay
     public int      top           { get; set; }
     public int      bot           { get; set; }
     public object[] hs            { get; set; }
+
+    public static BingImageOfTheDay FromPeaPixDto(BingImageOfDayPeapixDto peapixDto)
+    {
+        return new BingImageOfTheDay
+        {
+            title = peapixDto.title,
+            copyright = peapixDto.copyright,
+            url = peapixDto.fullUrl,
+            fullstartdate = peapixDto.date.ToString("yyyyMMdd"),
+            startdate = peapixDto.date.ToString("yyyyMMdd"),
+            enddate = peapixDto.date.ToString("yyyyMMdd")
+        };
+    }
 }

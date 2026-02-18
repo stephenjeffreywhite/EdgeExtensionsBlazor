@@ -1,13 +1,15 @@
 ﻿@page "/index.html"
-@using BlazorEdgeNewTab.Services.Interfaces
+@using BlazorEdgeNewTab.Services
 @inherits IndexPage;
-@inject IJSRuntime     JS;
-@inject INewTabService NewTabService;
+@inject IJSRuntime    JsRunTime;
+@inject NewTabService NewTabService;
+@inject SettingsService SettingsService;
 <div class="container-fluid" xmlns="http://www.w3.org/1999/html">
     <div class="row TopMenuRowStyle" id="TopMenuRow">
         <div class="col">
             <div class="dropdown">
-                <button class="dropdown-toggle TopMenuIconStyle btn" type="button" id="waffleDropDown" data-bs-toggle="dropdown" aria-expanded="false" title="Microsoft 365 Sites/Apps">
+                <button class="dropdown-toggle TopMenuIconStyle btn" type="button" id="waffleDropDown" data-bs-toggle="dropdown" aria-expanded="false" title="Microsoft 365 Sites/Apps"
+                        data-bs-auto-close="false">
                     <img src="\icons\fluent_square_menu.png" alt="waffle icon">
                 </button>
                 <div class="dropdown-menu p-4 text-muted M365PopUp" style="min-width: 350px" aria-labelledby="waffleDropDown">
@@ -24,10 +26,15 @@
             </div>
         </div>
         <div class="col-1">
-            <SettingsMenu @ref="SettingsMenuNewTab" OnQuickLinksFolderChangedCallBack="QuickLinksFolderChangedHandler"
-                          OnSearchVisibleChangedCallBack="SearchVisibleChanged"
+            <SettingsMenu ChangeQuickLinkFolder="EditQuickLinkFolder"
+                          SearchVisible="@SearchVisible"
+                          UsePeaPix="@UsePeaPix"
+                          UsePeaPixChanged="UsePeaPixChanged"
+                          SearchVisibleChanged="SearchVisibleChanged"
                           OnRefreshImageOfDayCallBack="RefreshImageOfDayHandler"
-                          OnQuickLinksVisibleChangedCallBack="QuickLinksVisibleChanged">
+                          QuickLinksVisible="@QuickLinksVisible"
+                          QuickLinksVisibleChanged="QuickLinksVisibleChanged"
+                          OnResetSettingsCallBack="ResetSettings">
             </SettingsMenu>
         </div>
     </div>
@@ -59,15 +66,15 @@
         </div>
         <div class="col"></div>
         <div class="col-6">
-            <form @onsubmit="Enter" hidden="@(!_searchVisible)">
+            <form @onsubmit="Enter" hidden="@(!SearchVisible)">
                 <div class="input-group mb-3">
                     <input class="form-control SearchBoxStyle" type="text" @bind="SearchQuery" placeholder="@SearchEmptyText" aria-label="Query" aria-describedby="queryButtonAddon" name="SearchBox"
-                           @ref="SearchBoxElement">
+                           @ref="SearchBoxElement" data-bs-theme="dark">
                     <input type="checkbox" class="btn-check" id="btn-check" autocomplete="off" @bind="FilterMode"
-                           >
+                    >
                     <label class="btn btn-secondary SearchButtonStyle" for="btn-check" title="@(@FilterMode ? "Click here to toggle filter mode off" : "Click here to toggle filter mode on - searches will be done against your bookmarks below")">
                         <img alt="Filter Icon" src="./icons/fluent_filter.png" style="height: 24px; width: 24px;"
-                             />
+                        />
                     </label>
                     <button type="button" id="copilotButton" class="SearchButtonStyle" @onclick="UseCopilot" title="Click here to start chatting with Bing / Co-Pilot. This will leave your new tab page.">
                         <img src="icons/Copilot_Color_24x24.svg" alt="Copilot Icon"/>
@@ -79,7 +86,7 @@
             </form>
         </div>
         <div class="col">
-            <img src=".\icons\fluent_download.png" class="DownloadButtonStyle" alt="Click To Download" title="Click to download this image" @onclick="OnDownloadImageClick" hidden="@(!_searchVisible)"/>
+            <img src=".\icons\fluent_download.png" class="DownloadButtonStyle" alt="Click To Download" title="Click to download this image" @onclick="OnDownloadImageClick" hidden="@(!SearchVisible)"/>
         </div>
         <div class="col"></div>
     </div>
@@ -92,3 +99,6 @@
         </div>
     </div>
 </div>
+<SetupBookmarkModal BookmarkFolders="@BookmarkFolders" ShowSetUpModal="@ShowSetupModal" 
+                    @bind-NewQuickLinkBookMarkFolderName="@NewQuickLinkBookMarkFolderName" 
+                    SetUpQuickLinksFolder="@SetUpQuickLinksFolder"></SetupBookmarkModal>
