@@ -29,7 +29,7 @@ public class NewTabService
         SettingsService = settingsService;
     }
 
-    public async Task<BingImageOfTheDayDto?> GetImageOfDayDto(CancellationToken ct)
+    public async Task<BingImageOfTheDayDto> GetImageOfDayDto(CancellationToken ct)
     {
         var cachedDto = GetCachedImageOfDayDto();
         var reQueryTimeString =
@@ -74,7 +74,7 @@ public class NewTabService
         return cachedDto;
     }
 
-    private BingImageOfTheDayDto? GetCachedImageOfDayDto()
+    private BingImageOfTheDayDto GetCachedImageOfDayDto()
     {
         var cachedJson = SettingsService.GetSettingsValue<string>(SettingsValues.ImageOfTheDayCacheSetting);
         if (string.IsNullOrWhiteSpace(cachedJson)) return null;
@@ -91,11 +91,11 @@ public class NewTabService
         }
     }
 
-    private static bool HasUsableImages(BingImageOfTheDayDto? dto) =>
+    private static bool HasUsableImages(BingImageOfTheDayDto dto) =>
         dto?.images != null && dto.images.Count > 0 &&
         dto.images.All(image => image != null && !string.IsNullOrWhiteSpace(image.url));
 
-    private async Task<BingImageOfTheDayDto?> GetBingImages(CancellationToken ct)
+    private async Task<BingImageOfTheDayDto> GetBingImages(CancellationToken ct)
     {
         Console.WriteLine($"Getting Bing images directly: {BingUri}");
         _httpClient ??= new HttpClient();
