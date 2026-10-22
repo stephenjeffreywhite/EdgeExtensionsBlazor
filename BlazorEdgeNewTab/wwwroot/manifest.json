@@ -26,6 +26,9 @@
     "favicon",
     "downloads"
   ],
+  "host_permissions": [
+    "https://www.bing.com/*"
+  ],
   "icons": {
     "128": "icons/BlazorNewTab.png",
     "52": "icons/BlazorNewTab.png",

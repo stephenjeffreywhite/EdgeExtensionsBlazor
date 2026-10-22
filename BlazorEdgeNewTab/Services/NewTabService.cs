@@ -19,8 +19,8 @@ public class NewTabService
 {
     private readonly string PeaPixUri =
         "https://peapix.com/bing/feed?country=us&n=7";
-    private readonly string AllOriginsUri =
-        "https://api.allorigins.win/get?url=https%3A//www.bing.com/HPImageArchive.aspx%3Fformat%3Djs%26idx%3D0%26n%3D7";
+    private readonly string BingUri =
+        "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=7&mkt=en-US";
 
     private HttpClient _httpClient;
     public SettingsService SettingsService { get; }
@@ -31,82 +31,75 @@ public class NewTabService
 
     public async Task<BingImageOfTheDayDto?> GetImageOfDayDto(CancellationToken ct)
     {
+        var cachedDto = GetCachedImageOfDayDto();
         var reQueryTimeString =
             SettingsService.GetSettingsValue<string>(SettingsValues.ReQueryImagesAfterTimeSetting);
+        var hasFetchTime = DateTime.TryParse(reQueryTimeString, CultureInfo.InvariantCulture,
+            DateTimeStyles.None, out var lastFetchTime);
 
-        var reQueryTime =
-            Convert.ToDateTime(reQueryTimeString ?? DateTime.Now.AddDays(-1).ToString(CultureInfo.InvariantCulture));
+        if (cachedDto != null && hasFetchTime && lastFetchTime.Date == DateTime.Now.Date)
+        {
+            Console.WriteLine("Using cached Bing Image Of Day.");
+            return cachedDto;
+        }
 
         try
         {
-            var cachedJson = SettingsService.GetSettingsValue<string>(SettingsValues.ImageOfTheDayCacheSetting);
+            var usePeaPix = SettingsService.GetSettingsValue<bool>(SettingsValues.UsePeaPixSetting);
+            var dto = usePeaPix
+                ? await GetBingImagesFromPeaPix(ct)
+                : await GetBingImages(ct);
 
-            var shouldFetch =
-                DateTime.Now.Date > reQueryTime.Date || string.IsNullOrWhiteSpace(cachedJson);
+            if (!HasUsableImages(dto))
+                throw new JsonException("The image feed contained no usable images.");
 
-            if (shouldFetch)
-            {
-                Console.WriteLine("Getting Bing Image of Day from Bing");
-
-                // IMPORTANT: pass ct down into the actual HTTP call
-                var usePeaPix = SettingsService.GetSettingsValue<bool>(SettingsValues.UsePeaPixSetting);
-                if (usePeaPix)
-                {
-                    Console.WriteLine($"Using URL to get image of the day: {PeaPixUri}");
-                    return await GetBingImagesFromPeaPix(ct);
-                }
-                else
-                {
-                    Console.WriteLine($"Using URL to get image of the day: {AllOriginsUri}");
-                    return await GetBingImagesFromAllOrigins(ct);
-                }
-                
-            }
-
-            Console.WriteLine("Using cached Bing Image Of Day.");
-
-            // Cache could be corrupt; handle that gracefully
-            return JsonSerializer.Deserialize<BingImageOfTheDayDto>(cachedJson);
+            // Refresh scheduling follows the successful fetch, not the image publication date.
+            SettingsService.UpdateSetting(SettingsValues.ImageOfTheDayCacheSetting, JsonSerializer.Serialize(dto));
+            SettingsService.UpdateSetting(SettingsValues.ReQueryImagesAfterTimeSetting,
+                DateTime.Now.ToString(CultureInfo.InvariantCulture));
+            await SettingsService.SaveAsync();
+            return dto;
         }
-        catch (OperationCanceledException ex) when (ct.IsCancellationRequested)
+        catch (OperationCanceledException ex)
         {
-            Console.WriteLine($"Bing image fetch canceled: {ex.Message}");
-            return null;
+            Console.WriteLine($"Bing image fetch canceled or timed out: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to refresh Bing images: {ex}");
+        }
+
+        // A stale feed is preferable to losing the background during an outage.
+        // Do not advance the refresh time after a failed request.
+        return cachedDto;
+    }
+
+    private BingImageOfTheDayDto? GetCachedImageOfDayDto()
+    {
+        var cachedJson = SettingsService.GetSettingsValue<string>(SettingsValues.ImageOfTheDayCacheSetting);
+        if (string.IsNullOrWhiteSpace(cachedJson)) return null;
+
+        try
+        {
+            var dto = JsonSerializer.Deserialize<BingImageOfTheDayDto>(cachedJson);
+            return HasUsableImages(dto) ? dto : null;
         }
         catch (JsonException ex)
         {
             Console.WriteLine($"Cached Bing JSON was invalid: {ex.Message}");
             return null;
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed to get Bing image DTO: {ex}");
-            return null;
-        }
     }
 
-    private async Task<BingImageOfTheDayDto> GetBingImagesFromAllOrigins(CancellationToken ct)
+    private static bool HasUsableImages(BingImageOfTheDayDto? dto) =>
+        dto?.images != null && dto.images.Count > 0 &&
+        dto.images.All(image => image != null && !string.IsNullOrWhiteSpace(image.url));
+
+    private async Task<BingImageOfTheDayDto?> GetBingImages(CancellationToken ct)
     {
-        BingImageOfTheDayDto dto = new BingImageOfTheDayDto();
+        Console.WriteLine($"Getting Bing images directly: {BingUri}");
         _httpClient ??= new HttpClient();
-        var responseDto = await _httpClient.GetFromJsonAsync<AllOriginsResultDto>(AllOriginsUri, cancellationToken: ct);
-        if (responseDto != null)
-        {
-            var correctedJson = responseDto.contents.Replace("\\", "");
-            dto = JsonSerializer.Deserialize<BingImageOfTheDayDto>(correctedJson, new JsonSerializerOptions());
-            Console.WriteLine($"Dto from bing: {dto.images[0].fullstartdate}");
-            var imageDate = DateTime.ParseExact(dto.images[0].fullstartdate, "yyyyMMddHHmm",
-                CultureInfo.InvariantCulture);
-            SettingsService.UpdateSetting(SettingsValues.ImageOfTheDayCacheSetting, JsonSerializer.Serialize(dto));
-            SettingsService.UpdateSetting(SettingsValues.ReQueryImagesAfterTimeSetting,
-                imageDate.ToString(CultureInfo.InvariantCulture));
-            await SettingsService.SaveAsync();
-        }
-        else
-        {
-            Console.WriteLine("Received no or a null response back from All Origins. :(");
-        }
-        return dto;
+        return await _httpClient.GetFromJsonAsync<BingImageOfTheDayDto>(BingUri, cancellationToken: ct);
     }
 
     private async Task<BingImageOfTheDayDto> GetBingImagesFromPeaPix(CancellationToken ct)
@@ -118,18 +111,10 @@ public class NewTabService
         {
             foreach (var image in responseDto)
             {
+                if (image == null)
+                    throw new JsonException("PeaPix returned a null image entry.");
                 dto.images.Add(BingImageOfTheDay.FromPeaPixDto(image));
             }
-            var imageDate = DateTime.ParseExact(dto.images[0].fullstartdate, "yyyyMMdd",
-                CultureInfo.InvariantCulture);
-            SettingsService.UpdateSetting(SettingsValues.ImageOfTheDayCacheSetting, JsonSerializer.Serialize(dto));
-            SettingsService.UpdateSetting(SettingsValues.ReQueryImagesAfterTimeSetting,
-                imageDate.ToString(CultureInfo.InvariantCulture));
-            await SettingsService.SaveAsync();
-        }
-        else
-        {
-            Console.WriteLine("Received no or a null response back from PeaPix. :(");
         }
         return dto;
     }
