@@ -35,12 +35,12 @@ public static class SettingsValues
     public static readonly SettingsValue ReQueryImagesAfterTimeSetting =
         new(ReQueryImagesAfterTime, DateTime.Now.ToString(CultureInfo.InvariantCulture));
     public static readonly SettingsValue UseQuickLinksFilterSetting = new(UseQuickLinksFilter, "false");
-    public static readonly SettingsValue UsePeaPixSetting = new(UsePeaPix, "true");
+    public static readonly SettingsValue UsePeaPixSetting = new(UsePeaPix, "false");
 
     /// <summary>
     /// The list of storage keys used for retrieving settings from storage
     /// </summary>
-    public static readonly StorageAreaGetKeys StorageKeys = new(
+    public static readonly GetKeys StorageKeys = new(
         new List<string>
         {
             SearchRegionSetting.Key,

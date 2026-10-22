@@ -2,15 +2,15 @@
 	
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
-		<AssemblyVersion>2026.0130.1.0</AssemblyVersion>
-		<FileVersion>2026.0130.1.0</FileVersion>
+		<AssemblyVersion>2026.1021.1.0</AssemblyVersion>
+		<FileVersion>2026.1021.1.0</FileVersion>
     <NoWarn>$(NoWarn);NU1504;NU1605</NoWarn>
 	</PropertyGroup>
 	
 	<ItemGroup>
-		<PackageReference Include="Blazor.BrowserExtension" Version="4.0.2" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.2" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.2" PrivateAssets="all" />
+		<PackageReference Include="Blazor.BrowserExtension" Version="5.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.13" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.13" PrivateAssets="all" />
 	</ItemGroup>
 	
 	<ItemGroup>
