@@ -18,8 +18,7 @@ This is a new tab page extension that is similar to the new tab page for Microso
 
  *Having a lot of Bookmarks in a particular folder will however make the page get bigger and may require you to scroll down.
 
-**Note:** By default this extension uses Peapix.com's API for the Bing images of the day. This is because Bing's official API has CORS restrictions. Unfortunately, Peapix does not return the quiz question links for the museum cards on the new tab page.
-**Note 2**: In the settings, you can use the old version of the extension's CORS Proxy, AllOrigins.Win for the Bing Images, but I do not recommend using it since AllOrigins.Win is not reliable. I am looking into a different proxy.
+**Note:** By default this extension uses Bing's API / wallpaper feed for the Bing images of the day. You can toggle to use Peapix instead in the settings if for some reason Bing's API does not work. 
 
 ### Get Blazor New Tab from the Edge Add-Ons Website:
 
@@ -40,7 +39,7 @@ This is a new tab page extension that is similar to the new tab page for Microso
 
 2) Your new tab page should be replaced with one provided by the extension.
 
-3) The new tab page should load the bing image of the day, assuming Peapix (or allorigins.win) and bing are available.
+3) The new tab page should load the Bing image of the day, assuming Bing (or Peapix) is available. 
 
 4) If you are running the Extension for the first time, it will prompt you to select a Bookmarks folder to use for your Quicklinks. You can change this in the future via the button in the settings menu in the upper right hand corner.
 
